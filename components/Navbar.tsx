@@ -20,7 +20,7 @@ import Link from "next/link";
 
 // constants
 import { BRAND } from "../constants";
-import NAV_LINKS from "../constants/navLinks";
+import { NAV_LINKS } from "../constants/links";
 
 import { useState } from "react";
 
@@ -59,7 +59,7 @@ export default function Navbar() {
   const classes = useStyles();
 
   return (
-    <AppBar className={classes.appBar} position="static">
+    <AppBar className={classes.appBar} position="sticky">
       <Toolbar className={classes.toolbar}>
         <Image src={BRAND.logo.logo1} alt="logo1" height={40} width={100} />
         <Container className={classes.container}>
