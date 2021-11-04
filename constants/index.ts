@@ -1,9 +1,10 @@
+import Logo1 from "../assets/images/logo1.png";
+
 export const BRAND = {
   fullName: "Sasnaka Sansada Foundation",
   shortName: "Sasnaka",
   logo: {
-    logo1:
-      "https://learnsteer.sasnaka.org/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2020/12/sasnaka-learn-steer.png.webp",
+    logo1: Logo1,
     logo2: "",
   },
 };
