@@ -32,8 +32,8 @@ const useStyles = makeStyles((theme: Theme) => ({
       width: "80%",
     },
     [theme.breakpoints.up("sm")]: {
-      width: "60%",
-      maxWidth: "30em",
+      width: "70%",
+      maxWidth: "50em",
     },
   },
   form: {
@@ -42,7 +42,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     gap: theme.spacing(2),
     [theme.breakpoints.up("md")]: {
       flexDirection: "row",
+      alignItems: "center",
     },
+  },
+  formBtn: {
+    fontWeight: 600,
+    fontSize: "1.1em",
+    width: "100%",
   },
   group: {
     display: "flex",
@@ -108,7 +114,7 @@ const Home: NextPage = () => {
           <Button
             variant="contained"
             type="submit"
-            sx={{ fontWeight: 600, fontSize: "1.1em" }}
+            sx={{ fontWeight: 600, fontSize: "1.1em", width: "100%" }}
             startIcon={
               loading ? (
                 <CircularProgress size="1rem" color="secondary" />
@@ -117,6 +123,9 @@ const Home: NextPage = () => {
             disabled={loading}
           >
             {loading ? "Submitting" : "Submit"}
+          </Button>
+          <Button variant="contained" color="error" className={classes.formBtn}>
+            Reset
           </Button>
         </form>
         <Divider />
@@ -134,8 +143,33 @@ const Home: NextPage = () => {
               <Typography className={classes.key}>Index Number</Typography>
               <Typography>3230853</Typography>
             </Box>
+            <Box className={classes.resultRow}>
+              <Typography className={classes.key}>Year</Typography>
+              <Typography>2021</Typography>
+            </Box>
+            <Box className={classes.resultRow}>
+              <Typography className={classes.key}>Subject Stream</Typography>
+              <Typography>Physical Science</Typography>
+            </Box>
           </Box>
-
+          <Divider />
+          <Box className={classes.group}>
+            <Box className={classes.resultRow}>
+              <Typography className={classes.key}>Physics</Typography>
+              <Typography>A</Typography>
+            </Box>
+            <Box className={classes.resultRow}>
+              <Typography className={classes.key}>Chemistry</Typography>
+              <Typography>A</Typography>
+            </Box>
+            <Box className={classes.resultRow}>
+              <Typography className={classes.key}>
+                Combined Mathematics
+              </Typography>
+              <Typography>A</Typography>
+            </Box>
+          </Box>
+          <Divider />
           <Box className={classes.group}>
             <Box className={classes.resultRow}>
               <Typography className={classes.key}>Z-Score</Typography>
@@ -144,22 +178,6 @@ const Home: NextPage = () => {
             <Box className={classes.resultRow}>
               <Typography className={classes.key}>Island Rank</Typography>
               <Typography>247</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Index Number</Typography>
-              <Typography>3230853</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Index Number</Typography>
-              <Typography>3230853</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Index Number</Typography>
-              <Typography>3230853</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Index Number</Typography>
-              <Typography>3230853</Typography>
             </Box>
           </Box>
         </Box>
