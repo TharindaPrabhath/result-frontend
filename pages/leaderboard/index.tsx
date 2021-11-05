@@ -1,7 +1,11 @@
 // mui
 import { Typography, Box, Theme, Card } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+
+// components
 import LeaderboardRow from "../../components/LeaderboardRow";
+
+// constants
 import { TEST_NAME } from "../../constants";
 import { LEADERBOARD_DUMMY_DATA } from "../../constants/dummyData";
 

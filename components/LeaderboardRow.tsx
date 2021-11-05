@@ -1,6 +1,8 @@
+// mui
 import { Typography, Box, Theme, Card } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { makeStyles } from "@mui/styles";
+
 import { isEmpty } from "../utils";
 
 export interface LeaderboardData {
@@ -11,12 +13,13 @@ export interface LeaderboardData {
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
-  box: {
+  card: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
     padding: "0.5em 1em",
+    height: "4em",
   },
   zScore: {
     [theme.breakpoints.down("md")]: {
@@ -29,7 +32,7 @@ export default function LeaderboardRow({ data }: { data: LeaderboardData }) {
   const classes = useStyles();
 
   return (
-    <Card className={classes.box}>
+    <Card className={classes.card}>
       <Box style={{ width: "2em" }}>
         <Typography sx={{ fontWeight: 600 }}>{data.rank}</Typography>
       </Box>
