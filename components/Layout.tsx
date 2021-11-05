@@ -14,6 +14,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         sx={{
           height: "100vh",
           backgroundColor: theme.palette.primary.light,
+          position: "relative",
         }}
       >
         {children}
