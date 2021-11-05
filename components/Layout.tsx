@@ -8,18 +8,10 @@ import Header from "./Header";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <Box>
       <Header />
-      <Box
-        sx={{
-          height: "100vh",
-          backgroundColor: theme.palette.primary.light,
-          position: "relative",
-        }}
-      >
-        {children}
-      </Box>
+      <Box>{children}</Box>
       <Footer />
-    </>
+    </Box>
   );
 }
