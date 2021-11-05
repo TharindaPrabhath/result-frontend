@@ -1,8 +1,15 @@
-import { Button, ThemeProvider, Typography } from "@mui/material";
+// mui
+import { Typography, Box } from "@mui/material";
+
+// next
 import type { NextPage } from "next";
 
 const Home: NextPage = () => {
-  return <Typography>Home</Typography>;
+  return (
+    <Box>
+      <Typography>Index</Typography>
+    </Box>
+  );
 };
 
 export default Home;
