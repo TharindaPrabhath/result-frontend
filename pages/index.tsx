@@ -15,6 +15,9 @@ import { makeStyles } from "@mui/styles";
 import type { NextPage } from "next";
 import { useState } from "react";
 
+// constants
+import { TEST_NAME } from "../constants";
+
 // utils
 import { isEmpty } from "../utils";
 
@@ -98,7 +101,7 @@ const Home: NextPage = () => {
           variant="h4"
           sx={{ textAlign: "center", marginTop: "-1em" }}
         >
-          Learnsteer Test
+          {TEST_NAME}
         </Typography>
         <Typography>Enter your index number to see your results</Typography>
 
