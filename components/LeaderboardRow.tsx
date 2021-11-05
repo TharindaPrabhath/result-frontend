@@ -1,6 +1,8 @@
+// mui
 import { Typography, Box, Theme, Card } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { makeStyles } from "@mui/styles";
+
 import { isEmpty } from "../utils";
 
 export interface LeaderboardData {
