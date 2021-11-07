@@ -23,7 +23,7 @@ import XLSX from "xlsx";
 
 // firebase
 import { db } from "../../firebase";
-import { addDoc, collection, serverTimestamp } from "@firebase/firestore";
+import { addDoc, collection } from "@firebase/firestore";
 
 // utils
 import { isEmpty } from "../../utils/index";
@@ -41,58 +41,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontWeight: 600,
   },
 }));
-
-const columns: GridColDef[] = [
-  { field: "id", headerName: "Index", width: 90 },
-  {
-    field: "name",
-    headerName: "Name",
-    width: 200,
-    editable: false,
-  },
-  {
-    field: "school",
-    headerName: "School",
-    width: 200,
-    editable: false,
-  },
-  {
-    field: "email",
-    headerName: "Email",
-    width: 200,
-    editable: false,
-  },
-  {
-    field: "physics",
-    headerName: "Physics",
-    width: 100,
-    editable: false,
-  },
-  {
-    field: "chemistry",
-    headerName: "Chemistry",
-    width: 110,
-    editable: false,
-  },
-  {
-    field: "combinedMathematics",
-    headerName: "Combined Mathematics",
-    width: 210,
-    editable: false,
-  },
-  {
-    field: "zScore",
-    headerName: "Z-Score",
-    width: 100,
-    editable: false,
-  },
-  {
-    field: "rank",
-    headerName: "Rank",
-    width: 100,
-    editable: false,
-  },
-];
 
 const readFile = (file: any) => {
   const promise = new Promise((resolve, reject) => {
@@ -119,9 +67,62 @@ export default function Loader() {
   const [file, setFile] = useState("");
   const fileImportRef = createRef<HTMLInputElement>();
   const [data, setData] = useState<any[]>([]);
-  const [stream, setStream] = useState("Physical Science");
+  const [stream, setStream] = useState("");
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
+
+  const columns: GridColDef[] = [
+    { field: "id", headerName: "Index", width: 90 },
+    {
+      field: "name",
+      headerName: "Name",
+      width: 200,
+      editable: false,
+    },
+    {
+      field: "school",
+      headerName: "School",
+      width: 200,
+      editable: false,
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      width: 200,
+      editable: false,
+    },
+    {
+      field: "physics",
+      headerName: "Physics",
+      width: 100,
+      editable: false,
+    },
+    {
+      field: "chemistry",
+      headerName: "Chemistry",
+      width: 110,
+      editable: false,
+    },
+    {
+      field: stream === "Physical Science" ? "combinedMathematics" : "biology",
+      headerName:
+        stream === "Physical Science" ? "Combined Mathematics" : "Biology",
+      width: stream === "Physical Science" ? 210 : 150,
+      editable: false,
+    },
+    {
+      field: "zScore",
+      headerName: "Z-Score",
+      width: 100,
+      editable: false,
+    },
+    {
+      field: "rank",
+      headerName: "Rank",
+      width: 100,
+      editable: false,
+    },
+  ];
 
   const handleFileImport = (e: any) => {
     const f = e.target.files[0];
@@ -155,11 +156,14 @@ export default function Loader() {
             result: d.chemistry,
           },
           {
-            subject: "Combined Mathematics",
-            result: d.combinedMathematics,
+            subject:
+              stream === "Physical Science"
+                ? "Combined Mathematics"
+                : "Biology",
+            result:
+              stream === "Physical Science" ? d.combinedMathematics : d.biology,
           },
         ],
-        createdAt: serverTimestamp(),
       })
         .then(() => {
           console.log(d.id + " Successfully added");
@@ -173,6 +177,7 @@ export default function Loader() {
   };
 
   const handleCancel = () => {
+    setStream("");
     setFile("");
     setData([]);
   };
@@ -190,47 +195,51 @@ export default function Loader() {
           alignItems: "center",
         }}
       >
-        <input
-          type="file"
-          value=""
-          ref={fileImportRef}
-          onChange={handleFileImport}
-          style={{ display: "none" }}
-        />
-        <TextField value={file} fullWidth disabled />
-        {!isEmpty(file) ? (
-          <Button
-            className={classes.button}
-            variant="contained"
-            color="error"
-            onClick={handleCancel}
+        <FormControl sx={{ width: "15em" }}>
+          <InputLabel id="stream">Subject Stream</InputLabel>
+          <Select
+            labelId="stream"
+            label="Subject Stream"
+            value={stream}
+            onChange={handleSubjectStream}
           >
-            Cancel
-          </Button>
-        ) : (
-          <Button
-            className={classes.button}
-            variant="contained"
-            onClick={() => fileImportRef.current!.click()}
-          >
-            Import
-          </Button>
+            <MenuItem value="Physical Science">Physical Science</MenuItem>
+            <MenuItem value="Biology">Biology</MenuItem>
+          </Select>
+        </FormControl>
+        {!isEmpty(stream) && (
+          <>
+            <input
+              type="file"
+              value=""
+              ref={fileImportRef}
+              onChange={handleFileImport}
+              style={{ display: "none" }}
+            />
+            <TextField value={file} fullWidth disabled />
+            {!isEmpty(file) ? (
+              <Button
+                className={classes.button}
+                variant="contained"
+                color="error"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+            ) : (
+              <Button
+                className={classes.button}
+                variant="contained"
+                onClick={() => fileImportRef.current!.click()}
+              >
+                Import
+              </Button>
+            )}
+          </>
         )}
       </Box>
       {!isEmpty(file) && (
         <Box style={{ width: "100%" }}>
-          <FormControl sx={{ width: "15em" }}>
-            <InputLabel id="stream">Subject Stream</InputLabel>
-            <Select
-              labelId="stream"
-              label="Subject Stream"
-              value={stream}
-              onChange={handleSubjectStream}
-            >
-              <MenuItem value="Physical Science">Physical Science</MenuItem>
-              <MenuItem value="Biology">Biology</MenuItem>
-            </Select>
-          </FormControl>
           {!isEmpty(stream) && (
             <Button
               className={classes.button}
