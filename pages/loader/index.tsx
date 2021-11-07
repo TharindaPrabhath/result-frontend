@@ -9,6 +9,11 @@ import {
   TextField,
   Button,
   CircularProgress,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
@@ -17,8 +22,11 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import XLSX from "xlsx";
 
 // firebase
-import { db, firebase } from "../../firebase";
-import { addDoc, collection } from "@firebase/firestore";
+import { db } from "../../firebase";
+import { addDoc, collection, serverTimestamp } from "@firebase/firestore";
+
+// utils
+import { isEmpty } from "../../utils/index";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -26,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "1em",
+    gap: theme.spacing(2),
     margin: "3em auto",
   },
   button: {
@@ -63,13 +71,13 @@ const columns: GridColDef[] = [
   {
     field: "chemistry",
     headerName: "Chemistry",
-    width: 150,
+    width: 110,
     editable: false,
   },
   {
     field: "combinedMathematics",
     headerName: "Combined Mathematics",
-    width: 300,
+    width: 210,
     editable: false,
   },
   {
@@ -107,36 +115,11 @@ const readFile = (file: any) => {
   return promise;
 };
 
-// const getAsResultObj = (d: any): Result => {
-//   return {
-//     index: d.id,
-//     name: d.name,
-//     school: d.school,
-//     email: d.email,
-//     rank: d.rank,
-//     zScore: d.zScore,
-//     subjectStream: "Physical Science",
-//     subjects: [
-//       {
-//         subject: "Physics",
-//         result: d.physics,
-//       },
-//       {
-//         subject: "Chemistry",
-//         result: d.chemistry,
-//       },
-//       {
-//         subject: "Combined Mathematics",
-//         result: d.combinedMathematics,
-//       },
-//     ],
-//   };
-// };
-
 export default function Loader() {
   const [file, setFile] = useState("");
   const fileImportRef = createRef<HTMLInputElement>();
   const [data, setData] = useState<any[]>([]);
+  const [stream, setStream] = useState("Physical Science");
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
 
@@ -146,15 +129,14 @@ export default function Loader() {
 
     readFile(f)
       .then((res) => {
-        console.log(res);
         setData(res as any[]);
       })
       .catch((e) => console.error(e));
   };
 
   const uploadToFirebase = () => {
-    setLoading(true);
     data.forEach(async (d) => {
+      setLoading(true);
       await addDoc(collection(db, "examines"), {
         index: d.id.toString(),
         name: d.name,
@@ -162,7 +144,7 @@ export default function Loader() {
         email: d.email,
         rank: d.rank,
         zScore: d.zScore,
-        subjectStream: "Physical Science",
+        subjectStream: stream,
         subjects: [
           {
             subject: "Physics",
@@ -177,11 +159,26 @@ export default function Loader() {
             result: d.combinedMathematics,
           },
         ],
+        createdAt: serverTimestamp(),
       })
-        .then(() => console.log("Successfully added"))
-        .catch((e) => console.error(e));
+        .then(() => {
+          console.log(d.id + " Successfully added");
+        })
+        .catch((e) => {
+          console.error(`${d.id} -> an error happened: ${e}`);
+        });
     });
+
     setLoading(false);
+  };
+
+  const handleCancel = () => {
+    setFile("");
+    setData([]);
+  };
+
+  const handleSubjectStream = (event: SelectChangeEvent) => {
+    setStream(event.target.value as string);
   };
 
   return (
@@ -201,29 +198,55 @@ export default function Loader() {
           style={{ display: "none" }}
         />
         <TextField value={file} fullWidth disabled />
-        <Button
-          className={classes.button}
-          variant="contained"
-          onClick={() => fileImportRef.current!.click()}
-        >
-          Import
-        </Button>
-      </Box>
-      {file && (
-        <Box style={{ width: "100%" }}>
+        {!isEmpty(file) ? (
           <Button
             className={classes.button}
             variant="contained"
-            onClick={uploadToFirebase}
-            disabled={loading}
-            startIcon={
-              loading ? (
-                <CircularProgress size="1rem" color="secondary" />
-              ) : null
-            }
+            color="error"
+            onClick={handleCancel}
           >
-            {loading ? "Uploading" : "Upload"}
+            Cancel
           </Button>
+        ) : (
+          <Button
+            className={classes.button}
+            variant="contained"
+            onClick={() => fileImportRef.current!.click()}
+          >
+            Import
+          </Button>
+        )}
+      </Box>
+      {!isEmpty(file) && (
+        <Box style={{ width: "100%" }}>
+          <FormControl sx={{ width: "15em" }}>
+            <InputLabel id="stream">Subject Stream</InputLabel>
+            <Select
+              labelId="stream"
+              label="Subject Stream"
+              value={stream}
+              onChange={handleSubjectStream}
+            >
+              <MenuItem value="Physical Science">Physical Science</MenuItem>
+              <MenuItem value="Biology">Biology</MenuItem>
+            </Select>
+          </FormControl>
+          {!isEmpty(stream) && (
+            <Button
+              className={classes.button}
+              variant="contained"
+              onClick={uploadToFirebase}
+              disabled={loading}
+              startIcon={
+                loading ? (
+                  <CircularProgress size="1rem" color="secondary" />
+                ) : null
+              }
+            >
+              {loading ? "Uploading" : "Upload"}
+            </Button>
+          )}
+
           <Box style={{ marginTop: "1em" }}>
             <DataGrid
               rows={data}
