@@ -21,13 +21,20 @@ import { TEST_NAME } from "../constants";
 // utils
 import { isEmpty } from "../utils";
 
-const sleep = (time: number) => new Promise((acc) => setTimeout(acc, time));
+// firebase
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+
+// const sleep = (time: number) => new Promise((acc) => setTimeout(acc, time));
 
 const useStyles = makeStyles((theme: Theme) => ({
-  box: { backgroundColor: theme.palette.primary.light, padding: "2em 0" },
+  box: {
+    backgroundColor: theme.palette.primary.light,
+    padding: "2em 0",
+  },
   card: {
     padding: "4em 1em",
-    margin: "0 auto",
+    margin: "5% auto",
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(2),
@@ -73,10 +80,25 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
+interface Result {
+  name: string;
+  index: string;
+  school?: string;
+  email?: string;
+  subjectStream: string;
+  rank: number;
+  zScore: number;
+  subjects: {
+    subject: string;
+    result: string;
+  }[];
+}
+
 const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
   const [index, setIndex] = useState("");
   const [error, setError] = useState("");
+  const [result, setResult] = useState<Result>(null!);
   const classes = useStyles();
 
   const handleChange = (e: any) => {
@@ -87,12 +109,39 @@ const Home: NextPage = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    // validating the index number
+    if (isEmpty(index)) {
+      setError("Required");
+      return;
+    }
+
     setLoading(true);
-    if (isEmpty(index)) setError("Required");
-    else console.log(index);
-    await sleep(5000);
-    setLoading(false);
+
+    // fetch data from firestore
+    const q = query(collection(db, "examines"), where("index", "==", index));
+    getDocs(q)
+      .then((res) => {
+        const docs = res.docs;
+        if (docs.length === 0) {
+          setError("Invalid index number");
+          return;
+        }
+
+        setResult(docs[0].data() as Result);
+      })
+      .catch((e) => console.error(e))
+      .finally(() => setLoading(false));
+
+    // await sleep(5000);
   };
+
+  const handleReset = (e: any) => {
+    e.preventDefault();
+    setResult(null!);
+  };
+
+  console.log(result);
 
   return (
     <Box className={classes.box}>
@@ -127,63 +176,69 @@ const Home: NextPage = () => {
           >
             {loading ? "Submitting" : "Submit"}
           </Button>
-          <Button variant="contained" color="error" className={classes.formBtn}>
-            Reset
-          </Button>
+          {result && (
+            <Button
+              variant="contained"
+              color="error"
+              className={classes.formBtn}
+              onClick={handleReset}
+            >
+              Reset
+            </Button>
+          )}
         </form>
-        <Divider />
-        <Box className={classes.group}>
+
+        {result && (
           <Box className={classes.group}>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Name</Typography>
-              <Typography>Tharinda P Anurajeewa</Typography>
+            <Divider />
+            <Box className={classes.group}>
+              <Box className={classes.resultRow}>
+                <Typography className={classes.key}>Name</Typography>
+                <Typography>{result.name}</Typography>
+              </Box>
+              <Box className={classes.resultRow}>
+                <Typography className={classes.key}>School</Typography>
+                <Typography>{result.school}</Typography>
+              </Box>
+              <Box className={classes.resultRow}>
+                <Typography className={classes.key}>Index Number</Typography>
+                <Typography>{result.index}</Typography>
+              </Box>
+              <Box className={classes.resultRow}>
+                <Typography className={classes.key}>Year</Typography>
+                <Typography>2021</Typography>
+              </Box>
+              <Box className={classes.resultRow}>
+                <Typography className={classes.key}>Subject Stream</Typography>
+                <Typography>{result.subjectStream}</Typography>
+              </Box>
             </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>School</Typography>
-              <Typography>Dharmaraja College, Kandy</Typography>
+            <Divider />
+            <Box className={classes.group}>
+              {result.subjects.map((subject, index) => {
+                return (
+                  <Box className={classes.resultRow} key={index}>
+                    <Typography className={classes.key}>
+                      {subject.subject}
+                    </Typography>
+                    <Typography>{subject.result}</Typography>
+                  </Box>
+                );
+              })}
             </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Index Number</Typography>
-              <Typography>3230853</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Year</Typography>
-              <Typography>2021</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Subject Stream</Typography>
-              <Typography>Physical Science</Typography>
+            <Divider />
+            <Box className={classes.group}>
+              <Box className={classes.resultRow}>
+                <Typography className={classes.key}>Z-Score</Typography>
+                <Typography>{result.zScore}</Typography>
+              </Box>
+              <Box className={classes.resultRow}>
+                <Typography className={classes.key}>Island Rank</Typography>
+                <Typography>{result.rank}</Typography>
+              </Box>
             </Box>
           </Box>
-          <Divider />
-          <Box className={classes.group}>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Physics</Typography>
-              <Typography>A</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Chemistry</Typography>
-              <Typography>A</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>
-                Combined Mathematics
-              </Typography>
-              <Typography>A</Typography>
-            </Box>
-          </Box>
-          <Divider />
-          <Box className={classes.group}>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Z-Score</Typography>
-              <Typography>2.4073</Typography>
-            </Box>
-            <Box className={classes.resultRow}>
-              <Typography className={classes.key}>Island Rank</Typography>
-              <Typography>247</Typography>
-            </Box>
-          </Box>
-        </Box>
+        )}
       </Card>
     </Box>
   );
