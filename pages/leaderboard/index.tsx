@@ -6,14 +6,15 @@ import { makeStyles } from "@mui/styles";
 import { GetServerSideProps } from "next";
 
 // components
-import LeaderboardRow from "../../components/LeaderboardRow";
+import LeaderboardRow, {
+  LeaderboardData,
+} from "../../components/LeaderboardRow";
 
 // constants
 import { TEST_NAME } from "../../constants";
-import { LEADERBOARD_DUMMY_DATA } from "../../constants/dummyData";
 
 // firebase
-import { collection, query, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
 import { db } from "../../firebase";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -39,8 +40,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export default function Leaderboard({ props }: { props: any }) {
-  console.log(props);
+export default function Leaderboard(props: any) {
+  const data = props.data as LeaderboardData[];
   const classes = useStyles();
   return (
     <Box className={classes.box}>
@@ -55,8 +56,8 @@ export default function Leaderboard({ props }: { props: any }) {
           {TEST_NAME}
         </Typography>
         <Box className={classes.leaderboardBox}>
-          {LEADERBOARD_DUMMY_DATA.map((data, index) => {
-            return <LeaderboardRow data={data} key={index} />;
+          {data.map((d, index) => {
+            return <LeaderboardRow data={d} key={index} />;
           })}
         </Box>
       </Card>
@@ -64,14 +65,22 @@ export default function Leaderboard({ props }: { props: any }) {
   );
 }
 
-// export const getServerSideProps: GetServerSideProps = async () => {
-//   const q = query(collection(db, "examines"), orderBy("rank"));
-//   const d = await getDocs(q);
-//   let out: any[] = [];
-//   d.docs.forEach((doc) => {
-//     out.push(doc.data());
-//   });
-//   return {
-//     props: out,
-//   };
-// };
+export const getServerSideProps: GetServerSideProps = async () => {
+  const q = query(collection(db, "examines"), orderBy("rank"), limit(10));
+  const d = await getDocs(q);
+  let out: LeaderboardData[] = [];
+  d.docs.forEach((doc) => {
+    const obj = doc.data();
+    out.push({
+      name: obj.name,
+      school: obj.school,
+      rank: obj.rank,
+      zScore: obj.zScore,
+    });
+  });
+  return {
+    props: {
+      data: out,
+    },
+  };
+};
