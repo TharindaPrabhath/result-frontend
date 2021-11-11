@@ -22,7 +22,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import XLSX from "xlsx";
 
 // firebase
-import { db } from "../../firebase";
+import { db } from "../../firebase/index";
 import { addDoc, collection } from "@firebase/firestore";
 
 // utils

@@ -23,7 +23,7 @@ import { isEmpty } from "../utils";
 
 // firebase
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "../firebase/index";
 
 // const sleep = (time: number) => new Promise((acc) => setTimeout(acc, time));
 
