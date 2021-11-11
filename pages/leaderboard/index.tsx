@@ -3,7 +3,7 @@ import { Typography, Box, Theme, Card } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 
 // next
-import { GetServerSideProps } from "next";
+import { GetStaticProps } from "next";
 
 // components
 import LeaderboardRow, {
@@ -15,7 +15,7 @@ import { TEST_NAME } from "../../constants";
 
 // firebase
 import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "../../firebase/index";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: { backgroundColor: theme.palette.primary.light, padding: "2em 0" },
@@ -65,7 +65,7 @@ export default function Leaderboard(props: any) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   const q = query(collection(db, "examines"), orderBy("rank"), limit(10));
   const d = await getDocs(q);
   let out: LeaderboardData[] = [];
