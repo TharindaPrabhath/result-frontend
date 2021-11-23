@@ -28,6 +28,9 @@ import { addDoc, collection } from "@firebase/firestore";
 // utils
 import { isEmpty } from "../../utils/index";
 
+// constants
+import { CUT_OFF_MARKS, Subject } from "../../constants/exam";
+
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
     textAlign: "center",
@@ -63,6 +66,49 @@ const readFile = (file: any) => {
   return promise;
 };
 
+const calculateTotalMarks = (
+  part1: number,
+  part2: number,
+  subject: Subject
+): number => {
+  if (subject === Subject.COMBINED_MATHEMATICS) {
+    return Math.round((part1 + part2) / 20);
+  }
+  return part1 + part2;
+};
+
+const calculateResult = (totalMarks: number, subject: Subject): string => {
+  switch (subject) {
+    case Subject.PHYSICS:
+      if (totalMarks >= CUT_OFF_MARKS.PHYSICS.A) return "A";
+      else if (totalMarks >= CUT_OFF_MARKS.PHYSICS.B) return "B";
+      else if (totalMarks >= CUT_OFF_MARKS.PHYSICS.C) return "C";
+      else if (totalMarks >= CUT_OFF_MARKS.PHYSICS.S) return "S";
+      return "F";
+
+    case Subject.CHEMISTRY:
+      if (totalMarks >= CUT_OFF_MARKS.CHEMISTRY.A) return "A";
+      else if (totalMarks >= CUT_OFF_MARKS.CHEMISTRY.B) return "B";
+      else if (totalMarks >= CUT_OFF_MARKS.CHEMISTRY.C) return "C";
+      else if (totalMarks >= CUT_OFF_MARKS.CHEMISTRY.S) return "S";
+      return "F";
+
+    case Subject.COMBINED_MATHEMATICS:
+      if (totalMarks >= CUT_OFF_MARKS.COMBINED_MATHEMATICS.A) return "A";
+      else if (totalMarks >= CUT_OFF_MARKS.COMBINED_MATHEMATICS.B) return "B";
+      else if (totalMarks >= CUT_OFF_MARKS.COMBINED_MATHEMATICS.C) return "C";
+      else if (totalMarks >= CUT_OFF_MARKS.COMBINED_MATHEMATICS.S) return "S";
+      return "F";
+
+    case Subject.BIOLOGY:
+      if (totalMarks >= CUT_OFF_MARKS.BIOLOGY.A) return "A";
+      else if (totalMarks >= CUT_OFF_MARKS.BIOLOGY.B) return "B";
+      else if (totalMarks >= CUT_OFF_MARKS.BIOLOGY.C) return "C";
+      else if (totalMarks >= CUT_OFF_MARKS.BIOLOGY.S) return "S";
+      return "F";
+  }
+};
+
 export default function Loader() {
   const [file, setFile] = useState("");
   const fileImportRef = createRef<HTMLInputElement>();
@@ -72,7 +118,8 @@ export default function Loader() {
   const classes = useStyles();
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "Index", width: 90 },
+    { field: "id", headerName: "Id", width: 20 },
+    { field: "index", headerName: "Index", width: 90 },
     {
       field: "name",
       headerName: "Name",
@@ -92,22 +139,51 @@ export default function Loader() {
       editable: false,
     },
     {
-      field: "physics",
-      headerName: "Physics",
-      width: 100,
+      field: "physicsPart1",
+      headerName: "Physics MCQ",
+      width: 160,
       editable: false,
     },
     {
-      field: "chemistry",
-      headerName: "Chemistry",
-      width: 110,
+      field: "physicsPart2",
+      headerName: "Physics Essay",
+      width: 160,
       editable: false,
     },
     {
-      field: stream === "Physical Science" ? "combinedMathematics" : "biology",
+      field: "chemistryPart1",
+      headerName: "Chemistry MCQ",
+      width: 160,
+      editable: false,
+    },
+    {
+      field: "chemistryPart2",
+      headerName: "Chemistry Essay",
+      width: 160,
+      editable: false,
+    },
+    {
+      field:
+        stream === "Physical Science"
+          ? "combinedMathematicsPart1"
+          : "biologyPart1",
       headerName:
-        stream === "Physical Science" ? "Combined Mathematics" : "Biology",
-      width: stream === "Physical Science" ? 210 : 150,
+        stream === "Physical Science"
+          ? "Combined Mathematics Part 1"
+          : "Biology MCQ",
+      width: stream === "Physical Science" ? 250 : 160,
+      editable: false,
+    },
+    {
+      field:
+        stream === "Physical Science"
+          ? "combinedMathematicsPart2"
+          : "biologyPart2",
+      headerName:
+        stream === "Physical Science"
+          ? "Combined Mathematics Part 2"
+          : "Biology Essay",
+      width: stream === "Physical Science" ? 250 : 160,
       editable: false,
     },
     {
@@ -139,7 +215,7 @@ export default function Loader() {
     data.forEach(async (d) => {
       setLoading(true);
       await addDoc(collection(db, "examines"), {
-        index: d.id.toString(),
+        index: d.index.toString(),
         name: d.name,
         school: d.school,
         email: d.email,
@@ -149,11 +225,55 @@ export default function Loader() {
         subjects: [
           {
             subject: "Physics",
-            result: d.physics,
+            result: calculateResult(
+              calculateTotalMarks(
+                d.physicsPart1,
+                d.physicsPart2,
+                Subject.PHYSICS
+              ),
+              Subject.PHYSICS
+            ),
+            totalMarks: calculateTotalMarks(
+              d.physicsPart1,
+              d.physicsPart2,
+              Subject.PHYSICS
+            ),
+            parts: [
+              {
+                name: "MCQ",
+                marks: d.physicsPart1,
+              },
+              {
+                name: "Essay",
+                marks: d.physicsPart2,
+              },
+            ],
           },
           {
             subject: "Chemistry",
-            result: d.chemistry,
+            result: calculateResult(
+              calculateTotalMarks(
+                d.chemistryPart1,
+                d.chemistryPart2,
+                Subject.CHEMISTRY
+              ),
+              Subject.CHEMISTRY
+            ),
+            totalMarks: calculateTotalMarks(
+              d.chemistryPart1,
+              d.chemistryPart2,
+              Subject.CHEMISTRY
+            ),
+            parts: [
+              {
+                name: "MCQ",
+                marks: d.chemistryPart1,
+              },
+              {
+                name: "Essay",
+                marks: d.chemistryPart2,
+              },
+            ],
           },
           {
             subject:
@@ -161,7 +281,51 @@ export default function Loader() {
                 ? "Combined Mathematics"
                 : "Biology",
             result:
-              stream === "Physical Science" ? d.combinedMathematics : d.biology,
+              stream === "Physical Science"
+                ? calculateResult(
+                    calculateTotalMarks(
+                      d.combinedMathematicsPart1,
+                      d.combinedMathematicsPart2,
+                      Subject.COMBINED_MATHEMATICS
+                    ),
+                    Subject.COMBINED_MATHEMATICS
+                  )
+                : calculateResult(
+                    calculateTotalMarks(
+                      d.biologyPart1,
+                      d.biologyPart2,
+                      Subject.BIOLOGY
+                    ),
+                    Subject.BIOLOGY
+                  ),
+            totalMarks:
+              stream === "Physical Science"
+                ? calculateTotalMarks(
+                    d.combinedMathematicsPart1,
+                    d.combinedMathematicsPart2,
+                    Subject.COMBINED_MATHEMATICS
+                  )
+                : calculateTotalMarks(
+                    d.biologyPart1,
+                    d.biologyPart2,
+                    Subject.BIOLOGY
+                  ),
+            parts: [
+              {
+                name: stream === "Physical Science" ? "Part 1" : "MCQ",
+                marks:
+                  stream === "Physical Science"
+                    ? d.combinedMathematicsPart1
+                    : d.biologyPart1,
+              },
+              {
+                name: stream === "Physical Science" ? "Part 2" : "Essay",
+                marks:
+                  stream === "Physical Science"
+                    ? d.combinedMathematicsPart2
+                    : d.biologyPart2,
+              },
+            ],
           },
         ],
       })
@@ -261,7 +425,7 @@ export default function Loader() {
               rows={data}
               columns={columns}
               //pageSize={5}
-              //rowsPerPageOptions={[5]}
+              rowsPerPageOptions={[10, 25, 50, 100]}
               checkboxSelection
               disableSelectionOnClick
               autoHeight
