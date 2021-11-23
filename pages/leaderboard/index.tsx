@@ -11,7 +11,7 @@ import LeaderboardRow, {
 } from "../../components/LeaderboardRow";
 
 // constants
-import { TEST_NAME } from "../../constants";
+import { TEST_NAME } from "../../constants/exam";
 
 // firebase
 import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";

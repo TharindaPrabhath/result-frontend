@@ -16,7 +16,8 @@ import type { NextPage } from "next";
 import { useState } from "react";
 
 // constants
-import { TEST_NAME } from "../constants";
+import { TEST_NAME } from "../constants/exam";
+import { Subject } from "../constants/exam";
 
 // utils
 import { isEmpty } from "../utils";
@@ -78,6 +79,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontWeight: 600,
     width: "10em",
   },
+  multipleExmineTopic: {
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.secondary.light,
+    textAlign: "center",
+    padding: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+  },
+  subjectPartsContainer: {
+    marginLeft: theme.spacing(3),
+  },
 }));
 
 interface Result {
@@ -91,6 +102,11 @@ interface Result {
   subjects: {
     subject: string;
     result: string;
+    totalMarks: number;
+    parts: {
+      name: string;
+      marks: number;
+    }[];
   }[];
 }
 
@@ -98,8 +114,16 @@ const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
   const [index, setIndex] = useState("");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<Result>(null!);
+  const [result, setResult] = useState<Result[]>(null!);
   const classes = useStyles();
+
+  const getAsResults = (arr: any[]): Result[] => {
+    let temp: any[] = [];
+    arr.forEach((i, index) => {
+      temp.push(i.data() as Result);
+    });
+    return temp;
+  };
 
   const handleChange = (e: any) => {
     const value = e.target.value;
@@ -128,7 +152,7 @@ const Home: NextPage = () => {
           return;
         }
 
-        setResult(docs[0].data() as Result);
+        setResult(getAsResults(docs));
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
@@ -187,58 +211,108 @@ const Home: NextPage = () => {
             </Button>
           )}
         </form>
-
-        {result && (
-          <Box className={classes.group}>
-            <Divider />
-            <Box className={classes.group}>
-              <Box className={classes.resultRow}>
-                <Typography className={classes.key}>Name</Typography>
-                <Typography>{result.name}</Typography>
-              </Box>
-              <Box className={classes.resultRow}>
-                <Typography className={classes.key}>School</Typography>
-                <Typography>{result.school}</Typography>
-              </Box>
-              <Box className={classes.resultRow}>
-                <Typography className={classes.key}>Index Number</Typography>
-                <Typography>{result.index}</Typography>
-              </Box>
-              <Box className={classes.resultRow}>
-                <Typography className={classes.key}>Year</Typography>
-                <Typography>2021</Typography>
-              </Box>
-              <Box className={classes.resultRow}>
-                <Typography className={classes.key}>Subject Stream</Typography>
-                <Typography>{result.subjectStream}</Typography>
-              </Box>
-            </Box>
-            <Divider />
-            <Box className={classes.group}>
-              {result.subjects.map((subject, index) => {
-                return (
-                  <Box className={classes.resultRow} key={index}>
-                    <Typography className={classes.key}>
-                      {subject.subject}
-                    </Typography>
-                    <Typography>{subject.result}</Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-            <Divider />
-            <Box className={classes.group}>
-              <Box className={classes.resultRow}>
-                <Typography className={classes.key}>Z-Score</Typography>
-                <Typography>{result.zScore}</Typography>
-              </Box>
-              <Box className={classes.resultRow}>
-                <Typography className={classes.key}>Island Rank</Typography>
-                <Typography>{result.rank}</Typography>
-              </Box>
-            </Box>
-          </Box>
+        {result && result.length > 1 && (
+          <Typography>
+            * Multiple examines have registered under the same index number
+          </Typography>
         )}
+        {result &&
+          result.map((r, i) => {
+            return (
+              <Box key={i}>
+                {result.length > 1 && (
+                  <Typography
+                    className={classes.multipleExmineTopic}
+                  >{`Examine: ${i + 1}`}</Typography>
+                )}
+
+                <Box className={classes.group}>
+                  <Box className={classes.group}>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>Name</Typography>
+                      <Typography>{r.name}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>School</Typography>
+                      <Typography>{r.school}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        Index Number
+                      </Typography>
+                      <Typography>{r.index}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>Year</Typography>
+                      <Typography>2021</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        Subject Stream
+                      </Typography>
+                      <Typography>{r.subjectStream}</Typography>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box className={classes.group}>
+                    {r.subjects &&
+                      r.subjects.map((subject, index) => {
+                        return (
+                          <Box key={index}>
+                            <Box className={classes.resultRow}>
+                              <Typography className={classes.key}>
+                                {subject.subject}
+                              </Typography>
+                              <Typography>{subject.result}</Typography>
+                            </Box>
+
+                            <Box className={classes.subjectPartsContainer}>
+                              {subject.parts &&
+                                subject.parts.map((part, index) => {
+                                  return (
+                                    <Box key={index}>
+                                      <Box className={classes.resultRow}>
+                                        <Typography className={classes.key}>
+                                          {part.name}
+                                        </Typography>
+                                        <Typography>
+                                          {subject.subject ===
+                                          Subject.COMBINED_MATHEMATICS.toString()
+                                            ? part.marks / 10
+                                            : part.marks}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
+                                  );
+                                })}
+                              <Box className={classes.resultRow}>
+                                <Typography className={classes.key}>
+                                  Total Marks
+                                </Typography>
+                                <Typography>{`${subject.totalMarks}%`}</Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                  </Box>
+                  <Divider />
+                  <Box className={classes.group}>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>Z-Score</Typography>
+                      <Typography>{r.zScore}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        Island Rank
+                      </Typography>
+                      <Typography>{r.rank}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            );
+          })}
       </Card>
     </Box>
   );
