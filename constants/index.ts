@@ -16,5 +16,3 @@ export const BRAND = {
   telephone: "+94 112 223 445",
   email: "info@sasnaka.org",
 };
-
-export const TEST_NAME = "Learnsteer Test - 2021";
