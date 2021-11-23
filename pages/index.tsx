@@ -78,6 +78,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontWeight: 600,
     width: "10em",
   },
+  multipleExmineTopic: {
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.secondary.light,
+    textAlign: "center",
+    padding: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+  },
 }));
 
 interface Result {
@@ -98,8 +105,16 @@ const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
   const [index, setIndex] = useState("");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<Result>(null!);
+  const [result, setResult] = useState<Result[]>(null!);
   const classes = useStyles();
+
+  const getAsResults = (arr: any[]): Result[] => {
+    let temp: any[] = [];
+    arr.forEach((i, index) => {
+      temp.push(i.data() as Result);
+    });
+    return temp;
+  };
 
   const handleChange = (e: any) => {
     const value = e.target.value;
@@ -128,7 +143,7 @@ const Home: NextPage = () => {
           return;
         }
 
-        setResult(docs[0].data() as Result);
+        setResult(getAsResults(docs));
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
@@ -187,8 +202,80 @@ const Home: NextPage = () => {
             </Button>
           )}
         </form>
+        {result && result.length > 1 && (
+          <Typography>
+            * Multiple examines have registered under the same index number
+          </Typography>
+        )}
+        {result &&
+          result.map((r, i) => {
+            return (
+              <Box key={i}>
+                {result.length > 1 && (
+                  <Typography
+                    className={classes.multipleExmineTopic}
+                  >{`Examine: ${i + 1}`}</Typography>
+                )}
 
-        {result && (
+                <Box className={classes.group}>
+                  <Box className={classes.group}>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>Name</Typography>
+                      <Typography>{r.name}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>School</Typography>
+                      <Typography>{r.school}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        Index Number
+                      </Typography>
+                      <Typography>{r.index}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>Year</Typography>
+                      <Typography>2021</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        Subject Stream
+                      </Typography>
+                      <Typography>{r.subjectStream}</Typography>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box className={classes.group}>
+                    {r.subjects &&
+                      r.subjects.map((subject, index) => {
+                        return (
+                          <Box className={classes.resultRow} key={index}>
+                            <Typography className={classes.key}>
+                              {subject.subject}
+                            </Typography>
+                            <Typography>{subject.result}</Typography>
+                          </Box>
+                        );
+                      })}
+                  </Box>
+                  <Divider />
+                  <Box className={classes.group}>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>Z-Score</Typography>
+                      <Typography>{r.zScore}</Typography>
+                    </Box>
+                    <Box className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        Island Rank
+                      </Typography>
+                      <Typography>{r.rank}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            );
+          })}
+        {/* {result && (
           <Box className={classes.group}>
             <Divider />
             <Box className={classes.group}>
@@ -238,7 +325,7 @@ const Home: NextPage = () => {
               </Box>
             </Box>
           </Box>
-        )}
+        )} */}
       </Card>
     </Box>
   );
