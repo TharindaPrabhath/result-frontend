@@ -14,6 +14,14 @@ export enum Subject {
   BIOLOGY = "Biology",
 }
 
+export enum Paper {
+  PHYSICS = "Physics",
+  CHEMISTRY = "Chemistry",
+  BIOLOGY = "Biology",
+  PURE_MATHEMATICS = "Pure Mathematics",
+  APPLIED_MATHEMATICS = "Applied Mathematics",
+}
+
 const PHYSICS: ResultLetter = {
   A: 75,
   B: 65,
