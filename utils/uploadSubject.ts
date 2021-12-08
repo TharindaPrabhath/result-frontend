@@ -1,16 +1,13 @@
 // firebase
-import {
-  addDoc,
-  setDoc,
-  collection,
-  doc,
-  where,
-  query,
-  getDocs,
-} from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/index";
 
+// utils
+import { generateExamineId, generateSubjectId } from "./index";
+
 // constants
+import { Paper, Subject } from "../constants/exam";
+
 const MAX_MCQ_TOTAL_MARKS = 50;
 const MAX_STRUCTURED_TOTAL_MARKS = 40;
 const MAX_COMBINED_MATHEMATICS_STRUCTURED_TOTAL_MARKS = 40;
@@ -22,19 +19,35 @@ const MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS = 50;
 const MAX_SINGLE_ESSAY_MARKS = 15;
 const MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS = 150;
 
-const uploadSubject = (data: any[], subject: string) => {
-  if (subject === "physics") {
-    console.log("Here in physics");
-    handleNotCMaths(data, "physics");
-  } else if (subject === "chemistry") {
-    console.log("Here in chemistry");
-    handleNotCMaths(data, "chemistry");
-  } else if (subject === "biology") {
-    console.log("Here in biology");
-    handleNotCMaths(data, "biology");
-  } else {
-    console.log("Here in combined mathematics");
-    handleCMaths(data);
+const uploadSubject = (data: any[], paper: string) => {
+  switch (paper) {
+    case Paper.PHYSICS:
+      console.log("Here in physics");
+      handleNotCMaths(data, Subject.PHYSICS);
+      break;
+
+    case Paper.CHEMISTRY:
+      console.log("Here in chemistry");
+      handleNotCMaths(data, Subject.CHEMISTRY);
+      break;
+
+    case Paper.BIOLOGY:
+      console.log("Here in biology");
+      handleNotCMaths(data, Subject.BIOLOGY);
+      break;
+
+    case Paper.PURE_MATHEMATICS:
+      console.log("Here in pure");
+      handlePureMathematics(data);
+      break;
+
+    case Paper.APPLIED_MATHEMATICS:
+      console.log("Here in applied");
+      handleAppliedMathematics(data);
+      break;
+
+    default:
+      return;
   }
 };
 
@@ -44,8 +57,11 @@ const handleNotCMaths = (data: any[], subject: string) => {
   let successCount = 0;
   let failCount = 0;
   data.forEach(async (d) => {
-    await addDoc(collection(db, subject), {
-      examine: d.index.toString(),
+    const examineId = generateExamineId(d.index.toString(), d.name);
+    const subjectId = generateSubjectId(d.index.toString(), d.name, subject);
+    const docRef = doc(db, subject.toLowerCase(), subjectId);
+    await setDoc(docRef, {
+      examine: examineId,
       result: d.result,
       totalMarks: d.totalMarks,
       marks: {
@@ -120,28 +136,13 @@ const handleNotCMaths = (data: any[], subject: string) => {
         ],
       },
     })
-      .then((insertedSubjectDoc) => {
+      .then(() => {
         successCount++;
         console.log(
-          `${successCount} - ${d.id} : ${d.index} SUCCESS -> ${insertedSubjectDoc.id}`
+          `${successCount} - ${d.id} : ${d.index} SUCCESS -> ${docRef.id}`
         );
 
-        // get all the examine docs having this index number
-        const q = query(
-          collection(db, "examines"),
-          where("index", "==", d.index.toString())
-        );
-        getDocs(q).then((res) => {
-          const docs = res.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-
-          // adding the relation to the relevant examine in the db
-          // (updating the examine document)
-          docs.map((document: any) => {
-            if (document.index === d.index.toString()) {
-              setSubject(document.id, insertedSubjectDoc.id, subject);
-            }
-          });
-        });
+        updateExamineDoc(examineId, subjectId, subject);
       })
       .catch((e) => {
         failCount++;
@@ -154,8 +155,16 @@ const handleCMaths = (data: any[]) => {
   let successCount = 0;
   let failCount = 0;
   data.forEach(async (d) => {
-    await addDoc(collection(db, "combinedMathematics"), {
-      examine: d.index.toString(),
+    const examineId = generateExamineId(d.index.toString(), d.name);
+    const subjectId = generateSubjectId(
+      d.index.toString(),
+      d.name,
+      Subject.COMBINED_MATHEMATICS
+    );
+    const docRef = doc(db, "combinedMathematics", subjectId);
+
+    await setDoc(docRef, {
+      examine: examineId,
       result: d.result,
       totalMarks: d.totalMarks,
       pureMathematics: {
@@ -262,142 +271,576 @@ const handleCMaths = (data: any[]) => {
           ],
         },
       },
-      appliedMathematics: {
-        marks: {
-          structured: {
-            marks: d.am_structured,
-            maxMarks: MAX_COMBINED_MATHEMATICS_STRUCTURED_TOTAL_MARKS,
-          },
-          essay: {
-            marks: d.am_essay,
-            maxMarks: MAX_COMBINED_MATHEMATICS_ESSAY_TOTAL_MARKS,
-          },
-        },
-        questions: {
-          structured: [
-            {
-              question: 1,
-              marks: d.am1,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 2,
-              marks: d.am2,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 3,
-              marks: d.am3,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 4,
-              marks: d.am4,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 5,
-              marks: d.am5,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 6,
-              marks: d.am6,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 7,
-              marks: d.am7,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 8,
-              marks: d.am8,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 9,
-              marks: d.am9,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 10,
-              marks: d.am10,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-          ],
-
-          essay: [
-            {
-              question: 11,
-              marks: d.am11,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 12,
-              marks: d.am12,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 13,
-              marks: d.am13,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 14,
-              marks: d.am14,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 15,
-              marks: d.am15,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 16,
-              marks: d.am16,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 17,
-              marks: d.am17,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-          ],
-        },
-      },
     })
-      .then((insertedSubjectDoc) => {
+      .then(() => {
         successCount++;
         console.log(
-          `${successCount} - ${d.id} : ${d.index} SUCCESS -> ${insertedSubjectDoc.id}`
+          `${successCount} - ${d.id} : ${d.index} SUCCESS -> ${docRef.id}`
         );
 
-        // get all the examine docs having this index number
-        const q = query(
-          collection(db, "examines"),
-          where("index", "==", d.index.toString())
-        );
-        getDocs(q).then((res) => {
-          const docs = res.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-
-          // adding the relation to the relevant examine in the db
-          // (updating the examine document)
-          docs.map((document: any) => {
-            if (document.index === d.index.toString()) {
-              setSubject(
-                document.id,
-                insertedSubjectDoc.id,
-                "combinedMathematics"
-              );
-            }
-          });
-        });
+        updateExamineDoc(examineId, subjectId, Subject.COMBINED_MATHEMATICS);
       })
       .catch((e) => {
         failCount++;
         console.error(`${failCount} - ${d.id} : ${d.index} FAIL -> ${e}`);
       });
+  });
+};
+
+const handlePureMathematics = (data: any[]) => {
+  let successCount = 0;
+  let failCount = 0;
+
+  data.forEach(async (d) => {
+    const examineId = generateExamineId(d.index.toString(), d.name);
+    const subjectId = generateSubjectId(
+      d.index.toString(),
+      d.name,
+      Subject.COMBINED_MATHEMATICS
+    );
+
+    getDoc(doc(db, "combinedMathematics", subjectId)).then((subject) => {
+      if (subject.exists()) {
+        setDoc(
+          doc(db, "combinedMathematics", subjectId),
+          {
+            pureMathematics: {
+              totalMarks: d.paperTotalMarks,
+              marks: {
+                structured: {
+                  marks: d.structured,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_STRUCTURED_TOTAL_MARKS,
+                },
+                essay: {
+                  marks: d.essay,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_ESSAY_TOTAL_MARKS,
+                },
+              },
+              questions: {
+                structured: [
+                  {
+                    question: 1,
+                    marks: d.q1,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 2,
+                    marks: d.q2,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 3,
+                    marks: d.q3,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 4,
+                    marks: d.q4,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 5,
+                    marks: d.q5,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 6,
+                    marks: d.q6,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 7,
+                    marks: d.q7,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 8,
+                    marks: d.q8,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 9,
+                    marks: d.q9,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 10,
+                    marks: d.q10,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                ],
+
+                essay: [
+                  {
+                    question: 11,
+                    marks: d.q11,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 12,
+                    marks: d.q12,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 13,
+                    marks: d.q13,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 14,
+                    marks: d.q14,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 15,
+                    marks: d.q15,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 16,
+                    marks: d.q16,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 17,
+                    marks: d.q17,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                ],
+              },
+            },
+          },
+          { merge: true }
+        )
+          .then(() => {
+            successCount++;
+            console.log(
+              `${successCount} - ${d.id} : ${d.index} SUCCESS (UPDATE) -> ${subjectId}`
+            );
+          })
+          .catch((e) => {
+            failCount++;
+            console.error(`${failCount} - ${d.id} : ${d.index} FAIL -> ${e}`);
+          });
+      } else {
+        setDoc(
+          doc(db, "combinedMathematics", subjectId),
+          {
+            examine: examineId,
+            result: d.result,
+            totalMarks: d.totalMarks,
+            pureMathematics: {
+              totalMarks: d.paperTotalMarks,
+              marks: {
+                structured: {
+                  marks: d.structured,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_STRUCTURED_TOTAL_MARKS,
+                },
+                essay: {
+                  marks: d.essay,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_ESSAY_TOTAL_MARKS,
+                },
+              },
+              questions: {
+                structured: [
+                  {
+                    question: 1,
+                    marks: d.q1,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 2,
+                    marks: d.q2,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 3,
+                    marks: d.q3,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 4,
+                    marks: d.q4,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 5,
+                    marks: d.q5,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 6,
+                    marks: d.q6,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 7,
+                    marks: d.q7,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 8,
+                    marks: d.q8,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 9,
+                    marks: d.q9,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 10,
+                    marks: d.q10,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                ],
+
+                essay: [
+                  {
+                    question: 11,
+                    marks: d.q11,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 12,
+                    marks: d.q12,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 13,
+                    marks: d.q13,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 14,
+                    marks: d.q14,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 15,
+                    marks: d.q15,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 16,
+                    marks: d.q16,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 17,
+                    marks: d.q17,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                ],
+              },
+            },
+          },
+          { merge: true }
+        )
+          .then(() => {
+            successCount++;
+            console.log(
+              `${successCount} - ${d.id} : ${d.index} SUCCESS -> ${subjectId}`
+            );
+
+            updateExamineDoc(
+              examineId,
+              subjectId,
+              Subject.COMBINED_MATHEMATICS
+            );
+          })
+          .catch((e) => {
+            failCount++;
+            console.error(`${failCount} - ${d.id} : ${d.index} FAIL -> ${e}`);
+          });
+      }
+    });
+  });
+};
+
+const handleAppliedMathematics = (data: any[]) => {
+  let successCount = 0;
+  let failCount = 0;
+
+  data.forEach(async (d) => {
+    const examineId = generateExamineId(d.index.toString(), d.name);
+    const subjectId = generateSubjectId(
+      d.index.toString(),
+      d.name,
+      Subject.COMBINED_MATHEMATICS
+    );
+
+    getDoc(doc(db, "combinedMathematics", subjectId)).then((subject) => {
+      if (subject.exists()) {
+        setDoc(
+          doc(db, "combinedMathematics", subjectId),
+          {
+            appliedMathematics: {
+              totalMarks: d.paperTotalMarks,
+              marks: {
+                structured: {
+                  marks: d.structured,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_STRUCTURED_TOTAL_MARKS,
+                },
+                essay: {
+                  marks: d.essay,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_ESSAY_TOTAL_MARKS,
+                },
+              },
+              questions: {
+                structured: [
+                  {
+                    question: 1,
+                    marks: d.q1,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 2,
+                    marks: d.q2,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 3,
+                    marks: d.q3,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 4,
+                    marks: d.q4,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 5,
+                    marks: d.q5,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 6,
+                    marks: d.q6,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 7,
+                    marks: d.q7,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 8,
+                    marks: d.q8,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 9,
+                    marks: d.q9,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 10,
+                    marks: d.q10,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                ],
+
+                essay: [
+                  {
+                    question: 11,
+                    marks: d.q11,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 12,
+                    marks: d.q12,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 13,
+                    marks: d.q13,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 14,
+                    marks: d.q14,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 15,
+                    marks: d.q15,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 16,
+                    marks: d.q16,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 17,
+                    marks: d.q17,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                ],
+              },
+            },
+          },
+          { merge: true }
+        )
+          .then(() => {
+            successCount++;
+            console.log(
+              `${successCount} - ${d.id} : ${d.index} SUCCESS (UPDATE) -> ${subjectId}`
+            );
+          })
+          .catch((e) => {
+            failCount++;
+            console.error(`${failCount} - ${d.id} : ${d.index} FAIL -> ${e}`);
+          });
+      } else {
+        setDoc(
+          doc(db, "combinedMathematics", subjectId),
+          {
+            examine: examineId,
+            result: d.result,
+            totalMarks: d.totalMarks,
+            appliedMathematics: {
+              totalMarks: d.paperTotalMarks,
+              marks: {
+                structured: {
+                  marks: d.structured,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_STRUCTURED_TOTAL_MARKS,
+                },
+                essay: {
+                  marks: d.essay,
+                  maxMarks: MAX_COMBINED_MATHEMATICS_ESSAY_TOTAL_MARKS,
+                },
+              },
+              questions: {
+                structured: [
+                  {
+                    question: 1,
+                    marks: d.q1,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 2,
+                    marks: d.q2,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 3,
+                    marks: d.q3,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 4,
+                    marks: d.q4,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 5,
+                    marks: d.q5,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 6,
+                    marks: d.q6,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 7,
+                    marks: d.q7,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 8,
+                    marks: d.q8,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 9,
+                    marks: d.q9,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                  {
+                    question: 10,
+                    marks: d.q10,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
+                  },
+                ],
+
+                essay: [
+                  {
+                    question: 11,
+                    marks: d.q11,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 12,
+                    marks: d.q12,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 13,
+                    marks: d.q13,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 14,
+                    marks: d.q14,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 15,
+                    marks: d.q15,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 16,
+                    marks: d.q16,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                  {
+                    question: 17,
+                    marks: d.q17,
+                    maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
+                  },
+                ],
+              },
+            },
+          },
+          { merge: true }
+        )
+          .then(() => {
+            successCount++;
+            console.log(
+              `${successCount} - ${d.id} : ${d.index} SUCCESS -> ${subjectId}`
+            );
+            updateExamineDoc(
+              examineId,
+              subjectId,
+              Subject.COMBINED_MATHEMATICS
+            );
+          })
+          .catch((e) => {
+            failCount++;
+            console.error(`${failCount} - ${d.id} : ${d.index} FAIL -> ${e}`);
+          });
+      }
+    });
+  });
+};
+
+const updateExamineDoc = (
+  examineId: string,
+  subjectId: string,
+  subject: string
+) => {
+  // get the exact examine doc
+  getDoc(doc(db, "examines", examineId)).then((examine) => {
+    if (examine.exists()) {
+      // update the examine doc by adding this subject ref id
+      setSubject(examineId, subjectId, subject);
+    } else {
+      console.error(`${examineId}: No such an examine was found`);
+    }
   });
 };
 
