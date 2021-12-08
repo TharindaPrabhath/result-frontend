@@ -1,6 +1,6 @@
 import { GridColDef } from "@mui/x-data-grid";
 
-const physics: GridColDef[] = [
+const nonCombinedMathematics: GridColDef[] = [
   { field: "id", headerName: "Id", width: 20 },
   { field: "index", headerName: "Index", width: 120 },
   {
@@ -16,253 +16,81 @@ const physics: GridColDef[] = [
     editable: false,
   },
   {
-    field: "physicsPart1",
-    headerName: "Part 1",
+    field: "mcq",
+    headerName: "MCQ",
     width: 80,
     editable: false,
   },
   {
-    field: "physicsPart2",
-    headerName: "Part 2",
+    field: "structured",
+    headerName: "Structured",
     width: 80,
     editable: false,
   },
   {
-    field: "p1",
+    field: "essay",
+    headerName: "Essay",
+    width: 80,
+    editable: false,
+  },
+  {
+    field: "q1",
     headerName: "1",
     width: 80,
     editable: false,
   },
   {
-    field: "p2",
+    field: "q2",
     headerName: "2",
     width: 80,
     editable: false,
   },
   {
-    field: "p3",
+    field: "q3",
     headerName: "3",
     width: 80,
     editable: false,
   },
   {
-    field: "p4",
+    field: "q4",
     headerName: "4",
     width: 80,
     editable: false,
   },
   {
-    field: "p5",
+    field: "q5",
     headerName: "5",
     width: 80,
     editable: false,
   },
   {
-    field: "p6",
+    field: "q6",
     headerName: "6",
     width: 80,
     editable: false,
   },
   {
-    field: "p7",
+    field: "q7",
     headerName: "7",
     width: 80,
     editable: false,
   },
   {
-    field: "p8",
+    field: "q8",
     headerName: "8",
     width: 80,
     editable: false,
   },
   {
-    field: "p9",
+    field: "q9",
     headerName: "9",
     width: 80,
     editable: false,
   },
   {
-    field: "p10",
+    field: "q10",
     headerName: "10",
     width: 80,
-    editable: false,
-  },
-];
-
-const chemistry: GridColDef[] = [
-  { field: "id", headerName: "Id", width: 20 },
-  { field: "index", headerName: "Index", width: 120 },
-  {
-    field: "result",
-    headerName: "Result",
-    width: 100,
-    editable: false,
-  },
-  {
-    field: "totalMarks",
-    headerName: "Total Marks",
-    width: 140,
-    editable: false,
-  },
-  {
-    field: "chemistryPart1",
-    headerName: "Part 1",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "chemistryPart2",
-    headerName: "Part 2",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c1",
-    headerName: "1",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c2",
-    headerName: "2",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c3",
-    headerName: "3",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c4",
-    headerName: "4",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c5",
-    headerName: "5",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c6",
-    headerName: "6",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c7",
-    headerName: "7",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c8",
-    headerName: "8",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c9",
-    headerName: "9",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "c10",
-    headerName: "10",
-    width: 90,
-    editable: false,
-  },
-];
-
-const biology: GridColDef[] = [
-  { field: "id", headerName: "Id", width: 20 },
-  { field: "index", headerName: "Index", width: 120 },
-  {
-    field: "result",
-    headerName: "Result",
-    width: 100,
-    editable: false,
-  },
-  {
-    field: "totalMarks",
-    headerName: "Total Marks",
-    width: 140,
-    editable: false,
-  },
-  {
-    field: "biologyPart1",
-    headerName: "Part 1",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "biologyPart2",
-    headerName: "Part 2",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b1",
-    headerName: "1",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b2",
-    headerName: "2",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b3",
-    headerName: "3",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b4",
-    headerName: "4",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b5",
-    headerName: "5",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b6",
-    headerName: "6",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b7",
-    headerName: "7",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b8",
-    headerName: "8",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b9",
-    headerName: "9",
-    width: 90,
-    editable: false,
-  },
-  {
-    field: "b10",
-    headerName: "10",
-    width: 90,
     editable: false,
   },
 ];
@@ -416,6 +244,6 @@ const combinedMathematics: GridColDef[] = [
   },
 ];
 
-const TABLE_COLUMNS = { physics, chemistry, biology, combinedMathematics };
+const TABLE_COLUMNS = { nonCombinedMathematics, combinedMathematics };
 
 export default TABLE_COLUMNS;
