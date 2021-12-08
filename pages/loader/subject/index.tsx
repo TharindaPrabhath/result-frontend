@@ -19,11 +19,11 @@ import { DataGrid } from "@mui/x-data-grid";
 // utils
 import { isEmpty } from "../../../utils";
 import readFile from "../../../utils/readFile";
+import uploadSubject from "../../../utils/uploadSubject";
 
 // constants
-import { Subject } from "../../../constants/exam";
+import { Paper } from "../../../constants/exam";
 import TABLE_COLUMNS from "../../../constants/loaderTableColumns";
-import uploadSubject from "../../../utils/uploadSubject";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -44,19 +44,24 @@ export default function ExamineLoader() {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState("");
   const fileImportRef = createRef<HTMLInputElement>();
-  const [subject, setSubject] = useState("");
-  const [columns, setColumns] = useState(TABLE_COLUMNS.nonCombinedMathematics);
+  const [paper, setPaper] = useState("");
+  const [columns, setColumns] = useState(TABLE_COLUMNS.nonMathematics);
   const [data, setData] = useState<any[]>([]);
   const classes = useStyles();
 
   useEffect(() => {
-    if (subject === Subject.COMBINED_MATHEMATICS)
-      setColumns(TABLE_COLUMNS.combinedMathematics);
-    else setColumns(TABLE_COLUMNS.nonCombinedMathematics);
-  }, [subject]);
+    if (
+      paper === Paper.PURE_MATHEMATICS ||
+      paper === Paper.APPLIED_MATHEMATICS
+    ) {
+      setColumns(TABLE_COLUMNS.mathematics);
+    } else {
+      setColumns(TABLE_COLUMNS.nonMathematics);
+    }
+  }, [paper]);
 
-  const handleSubjectChange = (event: SelectChangeEvent) => {
-    setSubject(event.target.value as string);
+  const handlePaperChange = (event: SelectChangeEvent) => {
+    setPaper(event.target.value as string);
   };
 
   const handleFileImport = (e: any) => {
@@ -76,26 +81,28 @@ export default function ExamineLoader() {
   };
 
   const handleUpload = () => {
-    console.log("Called");
-    uploadSubject(data, subject.toLowerCase());
+    uploadSubject(data, paper);
   };
 
   return (
     <Box className={classes.box}>
       <Typography variant="h3">Subject Data Loader</Typography>
       <FormControl sx={{ width: "15em" }}>
-        <InputLabel id="subject">Subject</InputLabel>
+        <InputLabel id="paper">Paper</InputLabel>
         <Select
-          labelId="subject"
-          label="Subject"
-          value={subject}
-          onChange={handleSubjectChange}
+          labelId="paper"
+          label="Paper"
+          value={paper}
+          onChange={handlePaperChange}
         >
-          <MenuItem value={Subject.PHYSICS}>{Subject.PHYSICS}</MenuItem>
-          <MenuItem value={Subject.CHEMISTRY}>{Subject.CHEMISTRY}</MenuItem>
-          <MenuItem value={Subject.BIOLOGY}>{Subject.BIOLOGY}</MenuItem>
-          <MenuItem value={Subject.COMBINED_MATHEMATICS}>
-            {Subject.COMBINED_MATHEMATICS}
+          <MenuItem value={Paper.PHYSICS}>{Paper.PHYSICS}</MenuItem>
+          <MenuItem value={Paper.CHEMISTRY}>{Paper.CHEMISTRY}</MenuItem>
+          <MenuItem value={Paper.BIOLOGY}>{Paper.BIOLOGY}</MenuItem>
+          <MenuItem value={Paper.PURE_MATHEMATICS}>
+            {Paper.PURE_MATHEMATICS}
+          </MenuItem>
+          <MenuItem value={Paper.APPLIED_MATHEMATICS}>
+            {Paper.APPLIED_MATHEMATICS}
           </MenuItem>
         </Select>
       </FormControl>
@@ -112,7 +119,7 @@ export default function ExamineLoader() {
           onChange={handleFileImport}
           style={{ display: "none" }}
         />
-        {!isEmpty(subject) && (
+        {!isEmpty(paper) && (
           <>
             <TextField value={file} fullWidth disabled />
             {!isEmpty(file) ? (
