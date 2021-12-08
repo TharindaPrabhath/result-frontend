@@ -165,8 +165,6 @@ const Home: NextPage = () => {
     setResult(null!);
   };
 
-  console.log(result);
-
   return (
     <Box className={classes.box}>
       <Card className={classes.card}>
