@@ -10,10 +10,11 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import CircularProgress from "@mui/material/CircularProgress";
 import { SelectChangeEvent } from "@mui/material";
 import { Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 
 // utils
 import { isEmpty } from "../../../utils";
@@ -22,6 +23,7 @@ import readFile from "../../../utils/readFile";
 // constants
 import { Subject } from "../../../constants/exam";
 import TABLE_COLUMNS from "../../../constants/loaderTableColumns";
+import uploadSubject from "../../../utils/uploadSubject";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -39,26 +41,18 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export default function ExamineLoader() {
+  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState("");
   const fileImportRef = createRef<HTMLInputElement>();
   const [subject, setSubject] = useState("");
-  const [columns, setColumns] = useState(TABLE_COLUMNS.physics);
+  const [columns, setColumns] = useState(TABLE_COLUMNS.nonCombinedMathematics);
   const [data, setData] = useState<any[]>([]);
   const classes = useStyles();
 
   useEffect(() => {
-    switch (subject) {
-      case Subject.PHYSICS:
-        setColumns(TABLE_COLUMNS.physics);
-      case Subject.CHEMISTRY:
-        setColumns(TABLE_COLUMNS.chemistry);
-      case Subject.BIOLOGY:
-        setColumns(TABLE_COLUMNS.biology);
-      case Subject.COMBINED_MATHEMATICS:
-        setColumns(TABLE_COLUMNS.combinedMathematics);
-      default:
-        setColumns(TABLE_COLUMNS.physics);
-    }
+    if (subject === Subject.COMBINED_MATHEMATICS)
+      setColumns(TABLE_COLUMNS.combinedMathematics);
+    else setColumns(TABLE_COLUMNS.nonCombinedMathematics);
   }, [subject]);
 
   const handleSubjectChange = (event: SelectChangeEvent) => {
@@ -81,7 +75,10 @@ export default function ExamineLoader() {
     setData([]);
   };
 
-  console.log(subject);
+  const handleUpload = () => {
+    console.log("Called");
+    uploadSubject(data, subject.toLowerCase());
+  };
 
   return (
     <Box className={classes.box}>
@@ -139,6 +136,25 @@ export default function ExamineLoader() {
           </>
         )}
       </Box>
+
+      {!isEmpty(file) && (
+        <Box>
+          <Button
+            className={classes.button}
+            variant="contained"
+            onClick={handleUpload}
+            disabled={loading}
+            startIcon={
+              loading ? (
+                <CircularProgress size="1rem" color="secondary" />
+              ) : null
+            }
+          >
+            {loading ? "Uploading" : "Upload"}
+          </Button>
+        </Box>
+      )}
+
       {!isEmpty(file) && (
         <Box style={{ marginTop: "1em", width: "100%" }}>
           <DataGrid

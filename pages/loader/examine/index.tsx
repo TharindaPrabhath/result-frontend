@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
@@ -13,6 +14,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 // utils
 import { isEmpty } from "../../../utils";
 import readFile from "../../../utils/readFile";
+import uploadExamines from "../../../utils/uploadExamines";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -30,6 +32,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export default function ExamineLoader() {
+  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState("");
   const fileImportRef = createRef<HTMLInputElement>();
   const [data, setData] = useState<any[]>([]);
@@ -86,8 +89,9 @@ export default function ExamineLoader() {
     setData([]);
   };
 
-  console.log(file);
-  console.log(data);
+  const handleUpload = async () => {
+    uploadExamines(data);
+  };
 
   return (
     <Box className={classes.box}>
@@ -125,6 +129,23 @@ export default function ExamineLoader() {
           </Button>
         )}
       </Box>
+      {!isEmpty(file) && (
+        <Box>
+          <Button
+            className={classes.button}
+            variant="contained"
+            onClick={handleUpload}
+            disabled={loading}
+            startIcon={
+              loading ? (
+                <CircularProgress size="1rem" color="secondary" />
+              ) : null
+            }
+          >
+            {loading ? "Uploading" : "Upload"}
+          </Button>
+        </Box>
+      )}
       {!isEmpty(file) && (
         <Box style={{ marginTop: "1em", width: "100%" }}>
           <DataGrid
