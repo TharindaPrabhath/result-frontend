@@ -151,142 +151,6 @@ const handleNotCMaths = (data: any[], subject: string) => {
   });
 };
 
-const handleCMaths = (data: any[]) => {
-  let successCount = 0;
-  let failCount = 0;
-  data.forEach(async (d) => {
-    const examineId = generateExamineId(d.index.toString(), d.name);
-    const subjectId = generateSubjectId(
-      d.index.toString(),
-      d.name,
-      Subject.COMBINED_MATHEMATICS
-    );
-    const docRef = doc(db, "combinedMathematics", subjectId);
-
-    await setDoc(docRef, {
-      examine: examineId,
-      result: d.result,
-      totalMarks: d.totalMarks,
-      pureMathematics: {
-        marks: {
-          structured: {
-            marks: d.pm_structured,
-            maxMarks: MAX_COMBINED_MATHEMATICS_STRUCTURED_TOTAL_MARKS,
-          },
-          essay: {
-            marks: d.pm_essay,
-            maxMarks: MAX_COMBINED_MATHEMATICS_ESSAY_TOTAL_MARKS,
-          },
-        },
-        questions: {
-          structured: [
-            {
-              question: 1,
-              marks: d.pm1,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 2,
-              marks: d.pm2,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 3,
-              marks: d.pm3,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 4,
-              marks: d.pm4,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 5,
-              marks: d.pm5,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 6,
-              marks: d.pm6,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 7,
-              marks: d.pm7,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 8,
-              marks: d.pm8,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 9,
-              marks: d.pm9,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-            {
-              question: 10,
-              marks: d.pm10,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_STRUCTURED_MARKS,
-            },
-          ],
-
-          essay: [
-            {
-              question: 11,
-              marks: d.pm11,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 12,
-              marks: d.pm12,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 13,
-              marks: d.pm13,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 14,
-              marks: d.pm14,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 15,
-              marks: d.pm15,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 16,
-              marks: d.pm16,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-            {
-              question: 17,
-              marks: d.pm17,
-              maxMarks: MAX_COMBINED_MATHEMATICS_SINGLE_ESSAY_MARKS,
-            },
-          ],
-        },
-      },
-    })
-      .then(() => {
-        successCount++;
-        console.log(
-          `${successCount} - ${d.id} : ${d.index} SUCCESS -> ${docRef.id}`
-        );
-
-        updateExamineDoc(examineId, subjectId, Subject.COMBINED_MATHEMATICS);
-      })
-      .catch((e) => {
-        failCount++;
-        console.error(`${failCount} - ${d.id} : ${d.index} FAIL -> ${e}`);
-      });
-  });
-};
-
 const handlePureMathematics = (data: any[]) => {
   let successCount = 0;
   let failCount = 0;
@@ -849,14 +713,22 @@ const setSubject = (
   insertedSubjectId: string,
   subject: string
 ) => {
-  if (subject === "physics") {
-    setPhysics(examineId, insertedSubjectId);
-  } else if (subject === "chemistry") {
-    setChemistry(examineId, insertedSubjectId);
-  } else if (subject === "biology") {
-    setBiology(examineId, insertedSubjectId);
-  } else {
-    setCombinedMathematics(examineId, insertedSubjectId);
+  switch (subject) {
+    case Subject.PHYSICS:
+      setPhysics(examineId, insertedSubjectId);
+      break;
+
+    case Subject.CHEMISTRY:
+      setChemistry(examineId, insertedSubjectId);
+      break;
+
+    case Subject.BIOLOGY:
+      setBiology(examineId, insertedSubjectId);
+      break;
+
+    case Subject.COMBINED_MATHEMATICS:
+      setCombinedMathematics(examineId, insertedSubjectId);
+      break;
   }
 };
 
@@ -865,7 +737,9 @@ const setPhysics = (examineId: string, insertedSubjectId: string) => {
   setDoc(
     doc(db, "examines", examineId),
     {
-      physics: insertedSubjectId,
+      subjects: {
+        physics: insertedSubjectId,
+      },
     },
     { merge: true }
   );
@@ -875,7 +749,9 @@ const setChemistry = (examineId: string, insertedSubjectId: string) => {
   setDoc(
     doc(db, "examines", examineId),
     {
-      chemistry: insertedSubjectId,
+      subjects: {
+        chemistry: insertedSubjectId,
+      },
     },
     { merge: true }
   );
@@ -885,7 +761,9 @@ const setBiology = (examineId: string, insertedSubjectId: string) => {
   setDoc(
     doc(db, "examines", examineId),
     {
-      biology: insertedSubjectId,
+      subjects: {
+        biology: insertedSubjectId,
+      },
     },
     { merge: true }
   );
@@ -898,7 +776,9 @@ const setCombinedMathematics = (
   setDoc(
     doc(db, "examines", examineId),
     {
-      combinedMathematics: insertedSubjectId,
+      subjects: {
+        combinedMathematics: insertedSubjectId,
+      },
     },
     { merge: true }
   );
