@@ -8,8 +8,15 @@ import {
   CircularProgress,
   Divider,
   Box,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Grid,
+  Stack,
+  useTheme,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 // next
 import type { NextPage } from "next";
@@ -31,8 +38,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "../firebase/index";
-
-// const sleep = (time: number) => new Promise((acc) => setTimeout(acc, time));
+import { grey } from "@mui/material/colors";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -83,7 +89,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   key: {
     fontWeight: 600,
-    width: "10em",
+    width: "15em",
   },
   multipleExmineTopic: {
     backgroundColor: theme.palette.secondary.main,
@@ -94,6 +100,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   subjectPartsContainer: {
     marginLeft: theme.spacing(3),
+  },
+  gradeLetter: {
+    backgroundColor: grey[400],
+    padding: theme.spacing(0.5),
+    width: "2em",
+    textAlign: "center",
   },
 }));
 
@@ -127,7 +139,6 @@ const Home: NextPage = () => {
 
   const getAsResults = async (arr: any[]) => {
     let tempResults: Result[] = [];
-    // let tempExamines: any[] = [];
 
     arr.forEach(async (i) => {
       let tempSubjects: ISubject[] = [];
@@ -188,27 +199,7 @@ const Home: NextPage = () => {
               );
           }
         );
-
-      // const physicsDoc = await getDoc(
-      //   doc(db, "physics", examine.subjects?.physics)
-      // );
-      // const chemistryDoc = await getDoc(
-      //   doc(db, "chemistry", examine.subjects?.chemistry)
-      // );
-
-      // tempSubjects.push({
-      //   name: Subject.PHYSICS,
-      //   content: physicsDoc.data(),
-      // });
-
-      // tempSubjects.push({
-      //   name: Subject.CHEMISTRY,
-      //   content: chemistryDoc.data(),
-      // });
-
-      //setResults(tempResults);
     });
-    // setResults(tempResults);
   };
 
   const handleChange = (e: any) => {
@@ -235,15 +226,16 @@ const Home: NextPage = () => {
         const docs = res.docs;
         if (docs.length === 0) {
           setError("Invalid index number");
+          setLoading(false);
           return;
         }
 
         getAsResults(docs).finally(() => setLoading(false));
       })
-      .catch((e) => console.error(e));
-    //.finally(() => setLoading(false));
-
-    // await sleep(5000);
+      .catch((e) => {
+        console.error(e);
+        setLoading(false);
+      });
   };
 
   const handleReset = (e: any) => {
@@ -303,7 +295,7 @@ const Home: NextPage = () => {
         {results &&
           results.map((result, i) => {
             return (
-              <Box key={i}>
+              <Box key={i} marginBottom="2em">
                 {results.length > 1 && (
                   <Typography
                     className={classes.multipleExmineTopic}
@@ -347,7 +339,9 @@ const Home: NextPage = () => {
                             <Typography className={classes.key}>
                               {subject.name}
                             </Typography>
-                            <Typography>{subject.content.result}</Typography>
+                            <Typography className={classes.gradeLetter}>
+                              {subject.content.result}
+                            </Typography>
                           </Box>
 
                           <Box className={classes.subjectPartsContainer}>
@@ -359,7 +353,7 @@ const Home: NextPage = () => {
                                     Structured (Pure)
                                   </Typography>
                                   <Typography>
-                                    {`${subject.content.pureMathematics.marks.structured.marks} out of ${subject.content.pureMathematics.marks.structured.maxMarks}`}
+                                    {`${subject.content.pureMathematics?.marks?.structured?.marks} out of ${subject.content.pureMathematics?.marks?.structured?.maxMarks}`}
                                   </Typography>
                                 </Box>
 
@@ -369,7 +363,7 @@ const Home: NextPage = () => {
                                     Essay (Pure)
                                   </Typography>
                                   <Typography>
-                                    {`${subject.content.pureMathematics.marks.essay.marks} out of ${subject.content.pureMathematics.marks.essay.maxMarks}`}
+                                    {`${subject.content.pureMathematics?.marks?.essay?.marks} out of ${subject.content.pureMathematics?.marks?.essay?.maxMarks}`}
                                   </Typography>
                                 </Box>
 
@@ -379,7 +373,7 @@ const Home: NextPage = () => {
                                     Structured (Applied)
                                   </Typography>
                                   <Typography>
-                                    {`${subject.content.appliedMathematics.marks.structured.marks} out of ${subject.content.appliedMathematics.marks.structured.maxMarks}`}
+                                    {`${subject.content.appliedMathematics?.marks?.structured?.marks} out of ${subject.content.appliedMathematics?.marks?.structured?.maxMarks}`}
                                   </Typography>
                                 </Box>
 
@@ -389,7 +383,7 @@ const Home: NextPage = () => {
                                     Essay (Applied)
                                   </Typography>
                                   <Typography>
-                                    {`${subject.content.appliedMathematics.marks.essay.marks} out of ${subject.content.appliedMathematics.marks.essay.maxMarks}`}
+                                    {`${subject.content.appliedMathematics?.marks?.essay?.marks} out of ${subject.content.appliedMathematics?.marks?.essay?.maxMarks}`}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -427,30 +421,178 @@ const Home: NextPage = () => {
                               </Box>
                             )}
 
-                            {/* {subject.content &&
-                                subject.content.map((part, index) => {
-                                  return (
-                                    <Box key={index}>
-                                      <Box className={classes.resultRow}>
-                                        <Typography className={classes.key}>
-                                          {part.name}
-                                        </Typography>
-                                        <Typography>
-                                          {subject.subject ===
-                                          Subject.COMBINED_MATHEMATICS.toString()
-                                            ? part.marks / 10
-                                            : part.marks}
-                                        </Typography>
-                                      </Box>
-                                    </Box>
-                                  );
-                                })} */}
                             <Box className={classes.resultRow}>
                               <Typography className={classes.key}>
                                 Total Marks
                               </Typography>
                               <Typography>{`${subject.content.totalMarks}%`}</Typography>
                             </Box>
+
+                            <Accordion sx={{ marginTop: "1em" }}>
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1a-content"
+                                id="panel1a-header"
+                              >
+                                <Typography>See more</Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                {subject.name ===
+                                Subject.COMBINED_MATHEMATICS ? (
+                                  <Box>
+                                    <Grid container>
+                                      {/* pure */}
+                                      <Grid item xs={12} md={6}>
+                                        <Grid item xs={12} md={6}>
+                                          <Typography textAlign="center">
+                                            Pure
+                                          </Typography>
+                                          {/* structured */}
+                                          <Stack textAlign="center">
+                                            <Typography gutterBottom>
+                                              structured
+                                            </Typography>
+                                            <Divider />
+
+                                            {subject.content.pureMathematics?.questions?.structured?.map(
+                                              (q: any, i: number) => {
+                                                return (
+                                                  <Pair
+                                                    key={i}
+                                                    title={`Q ${q.question}`}
+                                                    value={`${q.marks} /${q.maxMarks}`}
+                                                  />
+                                                );
+                                              }
+                                            )}
+                                          </Stack>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                          {/* essay */}
+                                          <Stack textAlign="center">
+                                            <Typography gutterBottom>
+                                              essay
+                                            </Typography>
+                                            <Divider />
+                                            {subject.content.pureMathematics?.questions?.essay?.map(
+                                              (q: any, i: number) => {
+                                                return (
+                                                  <Pair
+                                                    key={i}
+                                                    title={`Q ${q.question}`}
+                                                    value={`${q.marks} /${q.maxMarks}`}
+                                                  />
+                                                );
+                                              }
+                                            )}
+                                          </Stack>
+                                        </Grid>
+                                      </Grid>
+
+                                      {/* applied */}
+                                      <Grid item xs={12} md={6}>
+                                        <Grid item xs={12} md={6}>
+                                          <Typography textAlign="center">
+                                            Applied
+                                          </Typography>
+                                          {/* structured */}
+                                          <Stack textAlign="center">
+                                            <Typography gutterBottom>
+                                              structured
+                                            </Typography>
+                                            <Divider />
+                                            {subject.content.appliedMathematics?.questions?.structured?.map(
+                                              (q: any, i: number) => {
+                                                return (
+                                                  <Pair
+                                                    key={i}
+                                                    title={`Q ${q.question}`}
+                                                    value={`${q.marks} /${q.maxMarks}`}
+                                                  />
+                                                );
+                                              }
+                                            )}
+                                          </Stack>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                          {/* essay */}
+                                          <Stack textAlign="center">
+                                            <Typography gutterBottom>
+                                              essay
+                                            </Typography>
+                                            <Divider />
+                                            {subject.content.appliedMathematics?.questions?.essay?.map(
+                                              (q: any, i: number) => {
+                                                return (
+                                                  <Pair
+                                                    key={i}
+                                                    title={`Q ${q.question}`}
+                                                    value={`${q.marks} /${q.maxMarks}`}
+                                                  />
+                                                );
+                                              }
+                                            )}
+                                          </Stack>
+                                        </Grid>
+                                      </Grid>
+                                    </Grid>
+                                  </Box>
+                                ) : (
+                                  <Grid container spacing={2}>
+                                    <Grid item xs={12} md={6}>
+                                      {/* structured */}
+                                      <Stack textAlign="center">
+                                        <Typography gutterBottom>
+                                          structured
+                                        </Typography>
+                                        <Divider />
+                                        <Stack
+                                          justifyContent="center"
+                                          alignItems="center"
+                                        >
+                                          {subject.content.questions?.structured?.map(
+                                            (q: any, i: number) => {
+                                              return (
+                                                <Pair
+                                                  key={i}
+                                                  title={`Q ${q.question}`}
+                                                  value={`${q.marks} /${q.maxMarks}`}
+                                                />
+                                              );
+                                            }
+                                          )}
+                                        </Stack>
+                                      </Stack>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                      {/* essay */}
+                                      <Stack textAlign="center">
+                                        <Typography gutterBottom>
+                                          essay
+                                        </Typography>
+                                        <Divider />
+                                        <Stack
+                                          justifyContent="center"
+                                          alignItems="center"
+                                        >
+                                          {subject.content.questions?.essay?.map(
+                                            (q: any, i: number) => {
+                                              return (
+                                                <Pair
+                                                  key={i}
+                                                  title={`Q ${q.question}`}
+                                                  value={`${q.marks} /${q.maxMarks}`}
+                                                />
+                                              );
+                                            }
+                                          )}
+                                        </Stack>
+                                      </Stack>
+                                    </Grid>
+                                  </Grid>
+                                )}
+                              </AccordionDetails>
+                            </Accordion>
                           </Box>
                         </Box>
                       );
@@ -462,12 +604,12 @@ const Home: NextPage = () => {
                       <Typography className={classes.key}>Z-Score</Typography>
                       <Typography>{result.examine.zScore}</Typography>
                     </Box>
-                    <Box className={classes.resultRow}>
+                    {/* <Box className={classes.resultRow}>
                       <Typography className={classes.key}>
                         Island Rank
                       </Typography>
                       <Typography>{result.examine.rank}</Typography>
-                    </Box>
+                    </Box> */}
                   </Box>
                 </Box>
               </Box>
@@ -479,3 +621,15 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+const Pair = ({ title, value }: { title: string; value: string }) => {
+  const theme = useTheme();
+  return (
+    <Stack direction="row" gap={theme.spacing(5)}>
+      <Typography minWidth="5em" variant="caption">
+        {title}
+      </Typography>
+      <Typography variant="caption">{value}</Typography>
+    </Stack>
+  );
+};
