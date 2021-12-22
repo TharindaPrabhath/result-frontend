@@ -16,14 +16,20 @@ import type { NextPage } from "next";
 import { useState } from "react";
 
 // constants
-import { TEST_NAME } from "../constants/exam";
-import { Subject } from "../constants/exam";
+import { Subject, TEST_NAME } from "../constants/exam";
 
 // utils
 import { isEmpty } from "../utils";
 
 // firebase
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "../firebase/index";
 
 // const sleep = (time: number) => new Promise((acc) => setTimeout(acc, time));
@@ -91,7 +97,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-interface Result {
+interface Examine {
   name: string;
   index: string;
   school?: string;
@@ -99,30 +105,110 @@ interface Result {
   subjectStream: string;
   rank: number;
   zScore: number;
-  subjects: {
-    subject: string;
-    result: string;
-    totalMarks: number;
-    parts: {
-      name: string;
-      marks: number;
-    }[];
-  }[];
+  subjects: any;
+}
+
+interface Result {
+  examine: Examine;
+  subjects: ISubject[];
+}
+
+interface ISubject {
+  name: string;
+  content: any;
 }
 
 const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
   const [index, setIndex] = useState("");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<Result[]>(null!);
+  const [results, setResults] = useState<Result[]>([]);
   const classes = useStyles();
 
-  const getAsResults = (arr: any[]): Result[] => {
-    let temp: any[] = [];
-    arr.forEach((i, index) => {
-      temp.push(i.data() as Result);
+  const getAsResults = async (arr: any[]) => {
+    let tempResults: Result[] = [];
+    // let tempExamines: any[] = [];
+
+    arr.forEach(async (i) => {
+      let tempSubjects: ISubject[] = [];
+      const examine = i.data() as Examine;
+
+      // get each subject doc
+      if (examine.subjectStream === "Physical Science") {
+        // get combined mathematics
+        !isEmpty(examine.subjects?.combinedMathematics) &&
+          getDoc(
+            doc(
+              db,
+              "combinedMathematics",
+              examine.subjects?.combinedMathematics
+            )
+          ).then((subject) => {
+            tempSubjects.push({
+              name: Subject.COMBINED_MATHEMATICS,
+              content: subject.data(),
+            });
+          });
+      } else {
+        // get biology
+        !isEmpty(examine.subjects?.biology) &&
+          getDoc(doc(db, "biology", examine.subjects?.biology)).then(
+            (subject) => {
+              tempSubjects.push({
+                name: Subject.BIOLOGY,
+                content: subject.data(),
+              });
+            }
+          );
+      }
+
+      // get physics
+      !isEmpty(examine.subjects?.physics) &&
+        getDoc(doc(db, "physics", examine.subjects?.physics)).then(
+          (subject) => {
+            tempSubjects.push({
+              name: Subject.PHYSICS,
+              content: subject.data(),
+            });
+
+            // get chemistry
+            !isEmpty(examine.subjects?.chemistry) &&
+              getDoc(doc(db, "chemistry", examine.subjects?.chemistry)).then(
+                (subject) => {
+                  tempSubjects.push({
+                    name: Subject.CHEMISTRY,
+                    content: subject.data(),
+                  });
+                  tempResults.push({
+                    examine: examine,
+                    subjects: tempSubjects,
+                  });
+                  setResults([...tempResults]);
+                }
+              );
+          }
+        );
+
+      // const physicsDoc = await getDoc(
+      //   doc(db, "physics", examine.subjects?.physics)
+      // );
+      // const chemistryDoc = await getDoc(
+      //   doc(db, "chemistry", examine.subjects?.chemistry)
+      // );
+
+      // tempSubjects.push({
+      //   name: Subject.PHYSICS,
+      //   content: physicsDoc.data(),
+      // });
+
+      // tempSubjects.push({
+      //   name: Subject.CHEMISTRY,
+      //   content: chemistryDoc.data(),
+      // });
+
+      //setResults(tempResults);
     });
-    return temp;
+    // setResults(tempResults);
   };
 
   const handleChange = (e: any) => {
@@ -145,24 +231,24 @@ const Home: NextPage = () => {
     // fetch data from firestore
     const q = query(collection(db, "examines"), where("index", "==", index));
     getDocs(q)
-      .then((res) => {
+      .then(async (res) => {
         const docs = res.docs;
         if (docs.length === 0) {
           setError("Invalid index number");
           return;
         }
 
-        setResult(getAsResults(docs));
+        getAsResults(docs).finally(() => setLoading(false));
       })
-      .catch((e) => console.error(e))
-      .finally(() => setLoading(false));
+      .catch((e) => console.error(e));
+    //.finally(() => setLoading(false));
 
     // await sleep(5000);
   };
 
   const handleReset = (e: any) => {
     e.preventDefault();
-    setResult(null!);
+    setResults([]);
   };
 
   return (
@@ -198,7 +284,7 @@ const Home: NextPage = () => {
           >
             {loading ? "Submitting" : "Submit"}
           </Button>
-          {result && (
+          {results.length !== 0 && (
             <Button
               variant="contained"
               color="error"
@@ -209,16 +295,16 @@ const Home: NextPage = () => {
             </Button>
           )}
         </form>
-        {result && result.length > 1 && (
+        {results && results.length > 1 && (
           <Typography>
             * Multiple examines have registered under the same index number
           </Typography>
         )}
-        {result &&
-          result.map((r, i) => {
+        {results &&
+          results.map((result, i) => {
             return (
               <Box key={i}>
-                {result.length > 1 && (
+                {results.length > 1 && (
                   <Typography
                     className={classes.multipleExmineTopic}
                   >{`Examine: ${i + 1}`}</Typography>
@@ -228,17 +314,17 @@ const Home: NextPage = () => {
                   <Box className={classes.group}>
                     <Box className={classes.resultRow}>
                       <Typography className={classes.key}>Name</Typography>
-                      <Typography>{r.name}</Typography>
+                      <Typography>{result.examine.name}</Typography>
                     </Box>
                     <Box className={classes.resultRow}>
                       <Typography className={classes.key}>School</Typography>
-                      <Typography>{r.school}</Typography>
+                      <Typography>{result.examine.school}</Typography>
                     </Box>
                     <Box className={classes.resultRow}>
                       <Typography className={classes.key}>
                         Index Number
                       </Typography>
-                      <Typography>{r.index}</Typography>
+                      <Typography>{result.examine.index}</Typography>
                     </Box>
                     <Box className={classes.resultRow}>
                       <Typography className={classes.key}>Year</Typography>
@@ -248,25 +334,101 @@ const Home: NextPage = () => {
                       <Typography className={classes.key}>
                         Subject Stream
                       </Typography>
-                      <Typography>{r.subjectStream}</Typography>
+                      <Typography>{result.examine.subjectStream}</Typography>
                     </Box>
                   </Box>
                   <Divider />
-                  <Box className={classes.group}>
-                    {r.subjects &&
-                      r.subjects.map((subject, index) => {
-                        return (
-                          <Box key={index}>
-                            <Box className={classes.resultRow}>
-                              <Typography className={classes.key}>
-                                {subject.subject}
-                              </Typography>
-                              <Typography>{subject.result}</Typography>
-                            </Box>
 
-                            <Box className={classes.subjectPartsContainer}>
-                              {subject.parts &&
-                                subject.parts.map((part, index) => {
+                  <Box className={classes.group}>
+                    {result.subjects.map((subject, index) => {
+                      return (
+                        <Box key={index}>
+                          <Box className={classes.resultRow}>
+                            <Typography className={classes.key}>
+                              {subject.name}
+                            </Typography>
+                            <Typography>{subject.content.result}</Typography>
+                          </Box>
+
+                          <Box className={classes.subjectPartsContainer}>
+                            {subject.name === Subject.COMBINED_MATHEMATICS ? (
+                              <Box>
+                                {/* pure structured */}
+                                <Box className={classes.resultRow}>
+                                  <Typography className={classes.key}>
+                                    Structured (Pure)
+                                  </Typography>
+                                  <Typography>
+                                    {`${subject.content.pureMathematics.marks.structured.marks} out of ${subject.content.pureMathematics.marks.structured.maxMarks}`}
+                                  </Typography>
+                                </Box>
+
+                                {/* pure essay */}
+                                <Box className={classes.resultRow}>
+                                  <Typography className={classes.key}>
+                                    Essay (Pure)
+                                  </Typography>
+                                  <Typography>
+                                    {`${subject.content.pureMathematics.marks.essay.marks} out of ${subject.content.pureMathematics.marks.essay.maxMarks}`}
+                                  </Typography>
+                                </Box>
+
+                                {/* applied structured */}
+                                <Box className={classes.resultRow}>
+                                  <Typography className={classes.key}>
+                                    Structured (Applied)
+                                  </Typography>
+                                  <Typography>
+                                    {`${subject.content.appliedMathematics.marks.structured.marks} out of ${subject.content.appliedMathematics.marks.structured.maxMarks}`}
+                                  </Typography>
+                                </Box>
+
+                                {/* applied essay */}
+                                <Box className={classes.resultRow}>
+                                  <Typography className={classes.key}>
+                                    Essay (Applied)
+                                  </Typography>
+                                  <Typography>
+                                    {`${subject.content.appliedMathematics.marks.essay.marks} out of ${subject.content.appliedMathematics.marks.essay.maxMarks}`}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            ) : (
+                              <Box>
+                                {/* mcq */}
+                                <Box className={classes.resultRow}>
+                                  <Typography className={classes.key}>
+                                    MCQ
+                                  </Typography>
+                                  <Typography>
+                                    {`${subject.content.marks.mcq.marks} out of ${subject.content.marks.mcq.maxMarks}`}
+                                  </Typography>
+                                </Box>
+
+                                {/* structured */}
+                                <Box className={classes.resultRow}>
+                                  <Typography className={classes.key}>
+                                    Structured
+                                  </Typography>
+                                  <Typography>
+                                    {`${subject.content.marks.structured.marks} out of ${subject.content.marks.structured.maxMarks}`}
+                                  </Typography>
+                                </Box>
+
+                                {/* essay */}
+                                <Box className={classes.resultRow}>
+                                  <Typography className={classes.key}>
+                                    Essay
+                                  </Typography>
+                                  <Typography>
+                                    {`${subject.content.marks.essay.marks} out of ${subject.content.marks.essay.maxMarks}`}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            )}
+
+                            {/* {subject.content &&
+                                subject.content.map((part, index) => {
                                   return (
                                     <Box key={index}>
                                       <Box className={classes.resultRow}>
@@ -282,29 +444,29 @@ const Home: NextPage = () => {
                                       </Box>
                                     </Box>
                                   );
-                                })}
-                              <Box className={classes.resultRow}>
-                                <Typography className={classes.key}>
-                                  Total Marks
-                                </Typography>
-                                <Typography>{`${subject.totalMarks}%`}</Typography>
-                              </Box>
+                                })} */}
+                            <Box className={classes.resultRow}>
+                              <Typography className={classes.key}>
+                                Total Marks
+                              </Typography>
+                              <Typography>{`${subject.content.totalMarks}%`}</Typography>
                             </Box>
                           </Box>
-                        );
-                      })}
+                        </Box>
+                      );
+                    })}
                   </Box>
                   <Divider />
                   <Box className={classes.group}>
                     <Box className={classes.resultRow}>
                       <Typography className={classes.key}>Z-Score</Typography>
-                      <Typography>{r.zScore}</Typography>
+                      <Typography>{result.examine.zScore}</Typography>
                     </Box>
                     <Box className={classes.resultRow}>
                       <Typography className={classes.key}>
                         Island Rank
                       </Typography>
-                      <Typography>{r.rank}</Typography>
+                      <Typography>{result.examine.rank}</Typography>
                     </Box>
                   </Box>
                 </Box>
