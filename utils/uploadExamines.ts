@@ -15,8 +15,8 @@ const uploadExamines = (data: any[]) => {
     await setDoc(docRef, {
       index: d.index.toString(),
       name: d.name,
-      school: d.school,
-      email: d.email,
+      //school: d.school,
+      //email: d.email,
       rank: d.rank,
       zScore: d.zScore,
       subjectStream: d.subjectStream,

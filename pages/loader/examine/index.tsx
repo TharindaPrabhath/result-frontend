@@ -44,19 +44,13 @@ export default function ExamineLoader() {
     {
       field: "name",
       headerName: "Name",
-      width: 200,
+      width: 250,
       editable: false,
     },
     {
-      field: "school",
-      headerName: "School",
-      width: 200,
-      editable: false,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      width: 200,
+      field: "subjectStream",
+      headerName: "Stream",
+      width: 250,
       editable: false,
     },
     {
@@ -79,9 +73,25 @@ export default function ExamineLoader() {
 
     readFile(f)
       .then((res) => {
-        setData(res as any[]);
+        setData(getData(res as any[]));
       })
       .catch((e) => console.error(e));
+  };
+
+  const getData = (arr: any[]): any[] => {
+    let out: any[] = [];
+    for (var i = 0; i < arr.length; i++) {
+      const el = arr[i];
+      out.push({
+        id: i + 1,
+        index: el.index,
+        name: el.name,
+        subjectStream: el.subjectStream,
+        zScore: el.zScore,
+        rank: el.rank,
+      });
+    }
+    return out;
   };
 
   const handleCancel = () => {

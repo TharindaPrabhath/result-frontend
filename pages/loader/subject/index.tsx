@@ -70,9 +70,37 @@ export default function ExamineLoader() {
 
     readFile(f)
       .then((res) => {
-        setData(res as any[]);
+        setData(getData(res as any[]));
       })
       .catch((e) => console.error(e));
+  };
+
+  const getData = (arr: any[]): any[] => {
+    let out: any[] = [];
+    for (var i = 0; i < arr.length; i++) {
+      const el = arr[i];
+      out.push({
+        id: i + 1,
+        index: el.index,
+        name: el.name,
+        totalMarks: el.totalMarks,
+        result: el.result,
+        mcq: el.mcq,
+        structured: el.structured,
+        essay: el.essay,
+        q1: el.q1,
+        q2: el.q2,
+        q3: el.q3,
+        q4: el.q4,
+        q5: el.q5,
+        q6: el.q6,
+        q7: el.q7,
+        q8: el.q8,
+        q9: el.q9A || el.q9B || el.q9,
+        q10: el.q10A || el.q10B || el.q10,
+      });
+    }
+    return out;
   };
 
   const handleCancel = () => {
