@@ -1,6 +1,6 @@
 // firebase
 import { setDoc, doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/index";
+import db from "../firebase/index";
 
 // utils
 import { generateExamineId, generateSubjectId, isEmpty } from "./index";

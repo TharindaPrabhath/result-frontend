@@ -1,10 +1,10 @@
 // firebase
-import { addDoc, setDoc, collection, doc } from "@firebase/firestore";
-import { db } from "../firebase/index";
+import { setDoc, doc } from "@firebase/firestore";
+import db from "../firebase/index";
 
 // constants
 import { TEST_NAME } from "../constants/exam";
-import { generateExamineId } from ".";
+import { generateExamineId } from "./index";
 
 const uploadExamines = (data: any[]) => {
   let successCount = 0;

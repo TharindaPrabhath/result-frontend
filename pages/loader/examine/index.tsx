@@ -14,7 +14,13 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 // utils
 import { isEmpty } from "../../../utils";
 import readFile from "../../../utils/readFile";
-import uploadExamines from "../../../utils/uploadExamines";
+
+// firebase
+import db from "../../../firebase/index";
+import { doc, setDoc } from "firebase/firestore";
+
+// constants
+import { EXAM_ID } from "../../../constants/exam";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -35,7 +41,7 @@ export default function ExamineLoader() {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState("");
   const fileImportRef = createRef<HTMLInputElement>();
-  const [data, setData] = useState<any[]>([]);
+  const [examines, setExamines] = useState<any[]>([]);
   const classes = useStyles();
 
   const columns: GridColDef[] = [
@@ -48,7 +54,7 @@ export default function ExamineLoader() {
       editable: false,
     },
     {
-      field: "subjectStream",
+      field: "stream",
       headerName: "Stream",
       width: 250,
       editable: false,
@@ -73,22 +79,22 @@ export default function ExamineLoader() {
 
     readFile(f)
       .then((res) => {
-        setData(getData(res as any[]));
+        setExamines(getDataForTable(res as any[]));
       })
       .catch((e) => console.error(e));
   };
 
-  const getData = (arr: any[]): any[] => {
+  const getDataForTable = (arr: any[]): any[] => {
     let out: any[] = [];
     for (var i = 0; i < arr.length; i++) {
       const el = arr[i];
       out.push({
         id: i + 1,
         index: el.index,
-        name: el.name,
-        subjectStream: el.subjectStream,
-        zScore: el.zScore,
-        rank: el.rank,
+        name: isEmpty(el.name) ? `Unknown${i + 1}` : el.name,
+        stream: isEmpty(el.stream) ? "N/A" : el.stream,
+        zScore: isEmpty(el.zScore) ? "N/A" : el.zScore,
+        rank: isEmpty(el.rank) ? "N/A" : el.rank,
       });
     }
     return out;
@@ -96,16 +102,40 @@ export default function ExamineLoader() {
 
   const handleCancel = () => {
     setFile("");
-    setData([]);
+    setExamines([]);
   };
 
   const handleUpload = async () => {
-    uploadExamines(data);
+    uploadExamines(examines);
+  };
+
+  const uploadExamines = (examines: any[]) => {
+    let successCount = 0;
+    examines.forEach(async (examine, index) => {
+      // add each examine to its own doc
+      const docRef = doc(db, "examines", examine.index.toString());
+      setDoc(docRef, {
+        index: examine.index,
+        examId: EXAM_ID,
+        name: examine.name,
+        stream: examine.stream,
+        zScore: examine.zScore,
+        rank: examine.rank,
+      })
+        .then((res) => {
+          successCount++;
+          console.log(`Total Success - ${successCount} ${examine.index} added`);
+        })
+        .catch((err) => {
+          console.error(`${examine.index} failed to add`);
+          console.error(err);
+        });
+    });
   };
 
   return (
     <Box className={classes.box}>
-      <Typography variant="h3">Subject Data Loader</Typography>
+      <Typography variant="h3">Examine Data Loader</Typography>
       <Box
         sx={{
           display: "flex",
@@ -159,7 +189,7 @@ export default function ExamineLoader() {
       {!isEmpty(file) && (
         <Box style={{ marginTop: "1em", width: "100%" }}>
           <DataGrid
-            rows={data}
+            rows={examines}
             columns={columns}
             //pageSize={5}
             rowsPerPageOptions={[10, 25, 50, 100]}

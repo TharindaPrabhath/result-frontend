@@ -1,6 +1,6 @@
 import { Subject } from "../constants/exam";
 
-export function isEmpty(string: string) {
+export function isEmpty(string: string | undefined | null) {
   return string === null || string === undefined || string === "";
 }
 
