@@ -8,25 +8,37 @@ import {
   CircularProgress,
   Divider,
   Box,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Grid,
+  Stack,
+  useTheme,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import { grey } from "@mui/material/colors";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 // next
 import type { NextPage } from "next";
 import { useState } from "react";
 
 // constants
-import { TEST_NAME } from "../constants/exam";
-import { Subject } from "../constants/exam";
+import { Subject, TEST_NAME } from "../constants/exam";
 
 // utils
 import { isEmpty } from "../utils";
 
 // firebase
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebase/index";
-
-// const sleep = (time: number) => new Promise((acc) => setTimeout(acc, time));
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+} from "firebase/firestore";
+import db from "../firebase/index";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -77,7 +89,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   key: {
     fontWeight: 600,
-    width: "10em",
+    width: "15em",
   },
   multipleExmineTopic: {
     backgroundColor: theme.palette.secondary.main,
@@ -89,40 +101,59 @@ const useStyles = makeStyles((theme: Theme) => ({
   subjectPartsContainer: {
     marginLeft: theme.spacing(3),
   },
+  gradeLetter: {
+    backgroundColor: grey[400],
+    padding: theme.spacing(0.5),
+    width: "2em",
+    textAlign: "center",
+  },
 }));
-
-interface Result {
-  name: string;
-  index: string;
-  school?: string;
-  email?: string;
-  subjectStream: string;
-  rank: number;
-  zScore: number;
-  subjects: {
-    subject: string;
-    result: string;
-    totalMarks: number;
-    parts: {
-      name: string;
-      marks: number;
-    }[];
-  }[];
-}
 
 const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
   const [index, setIndex] = useState("");
   const [error, setError] = useState("");
-  const [result, setResult] = useState<Result[]>(null!);
+  const [examine, setExamine] = useState<any | null>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const classes = useStyles();
 
-  const getAsResults = (arr: any[]): Result[] => {
-    let temp: any[] = [];
-    arr.forEach((i, index) => {
-      temp.push(i.data() as Result);
-    });
-    return temp;
+  const getAsResults = async (examineDoc: any) => {
+    let tempSubjects: any[] = [];
+    try {
+      if (!isEmpty(examineDoc.subjects?.combinedMathematics)) {
+        console.log("Getting combined Maths");
+        const combinedMathematicsDoc = await getDoc(
+          doc(db, "subjects", examineDoc.subjects?.combinedMathematics)
+        );
+        tempSubjects.push(combinedMathematicsDoc.data());
+      }
+      if (!isEmpty(examineDoc.subjects?.physics)) {
+        console.log("Getting physics");
+        const physicsDoc = await getDoc(
+          doc(db, "subjects", examineDoc.subjects?.physics)
+        );
+        tempSubjects.push(physicsDoc.data());
+      }
+      if (!isEmpty(examineDoc.subjects?.chemistry)) {
+        console.log("Getting chemistry");
+        const chemistryDoc = await getDoc(
+          doc(db, "subjects", examineDoc.subjects?.chemistry)
+        );
+        tempSubjects.push(chemistryDoc.data());
+      }
+      if (!isEmpty(examineDoc.subjects?.biology)) {
+        console.log("Getting biology");
+        const biologyDoc = await getDoc(
+          doc(db, "subjects", examineDoc.subjects?.biology)
+        );
+        tempSubjects.push(biologyDoc.data());
+      }
+      console.log("adding");
+      setSubjects(tempSubjects);
+    } catch (err) {
+      console.error("An error occured");
+      console.error(err);
+    }
   };
 
   const handleChange = (e: any) => {
@@ -142,30 +173,240 @@ const Home: NextPage = () => {
 
     setLoading(true);
 
-    // fetch data from firestore
-    const q = query(collection(db, "examines"), where("index", "==", index));
+    // get the relevant examine
+    const q = query(
+      collection(db, "examines"),
+      where("index", "==", parseInt(index))
+    );
     getDocs(q)
-      .then((res) => {
+      .then(async (res) => {
         const docs = res.docs;
         if (docs.length === 0) {
           setError("Invalid index number");
+          setLoading(false);
           return;
         }
-
-        setResult(getAsResults(docs));
+        const examineDoc = docs[0].data();
+        setExamine(examineDoc as any[]);
+        getAsResults(examineDoc).finally(() => setLoading(false));
       })
-      .catch((e) => console.error(e))
-      .finally(() => setLoading(false));
-
-    // await sleep(5000);
+      .catch((e) => {
+        console.error(e);
+        setLoading(false);
+      });
   };
 
   const handleReset = (e: any) => {
     e.preventDefault();
-    setResult(null!);
+    setSubjects([]);
   };
 
-  console.log(result);
+  console.log(examine);
+  console.log(subjects);
+
+  const renderSubjects = subjects?.map((subject, index) => {
+    return (
+      <Box key={index}>
+        <Box className={classes.resultRow}>
+          <Typography className={classes.key}>{subject?.name}</Typography>
+          <Typography className={classes.gradeLetter}>
+            {subject?.grade}
+          </Typography>
+        </Box>
+        <Box className={classes.subjectPartsContainer}>
+          {subject.name === Subject.COMBINED_MATHEMATICS ? (
+            <>
+              {subject.parts?.pureMathematics?.marks?.map(
+                (mark: any, i: number) => {
+                  return (
+                    <Box key={i} className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        {`${mark?.name} (Pure)`}
+                      </Typography>
+                      <Typography>
+                        {`${mark?.marks}/${mark?.maxMarks}`}
+                      </Typography>
+                    </Box>
+                  );
+                }
+              )}
+              {subject.parts?.appliedMathematics?.marks?.map(
+                (mark: any, i: number) => {
+                  return (
+                    <Box key={i} className={classes.resultRow}>
+                      <Typography className={classes.key}>
+                        {`${mark?.name} (Applied)`}
+                      </Typography>
+                      <Typography>
+                        {`${mark?.marks}/${mark?.maxMarks}`}
+                      </Typography>
+                    </Box>
+                  );
+                }
+              )}
+            </>
+          ) : (
+            <>
+              {subject.marks?.map((mark: any, i: number) => {
+                return (
+                  <Box key={i} className={classes.resultRow}>
+                    <Typography className={classes.key}>
+                      {mark?.name}
+                    </Typography>
+                    <Typography>
+                      {`${mark?.marks}/${mark?.maxMarks}`}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </>
+          )}
+          <Box className={classes.resultRow}>
+            <Typography className={classes.key}>Total Marks</Typography>
+            <Typography>{`${subject?.totalMarks}%`}</Typography>
+          </Box>
+          <Accordion sx={{ marginTop: "1em" }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Typography>See more</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              {subject.name === Subject.COMBINED_MATHEMATICS ? (
+                <Box>
+                  <Grid container>
+                    {/* pure */}
+                    <Grid item xs={12} md={6}>
+                      <Grid item xs={12} md={6}>
+                        <Typography textAlign="center">Pure</Typography>
+                        {/* structured */}
+                        <Stack textAlign="center">
+                          <Typography gutterBottom>structured</Typography>
+                          <Divider />
+                          {subject?.parts?.pureMathematics?.questions?.structured?.map(
+                            (q: any, i: number) => {
+                              return (
+                                <Pair
+                                  key={i}
+                                  title={`Q ${q?.number}`}
+                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                />
+                              );
+                            }
+                          )}
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        {/* essay */}
+                        <Stack textAlign="center">
+                          <Typography gutterBottom>essay</Typography>
+                          <Divider />
+                          {subject?.parts?.pureMathematics?.questions?.essay?.map(
+                            (q: any, i: number) => {
+                              return (
+                                <Pair
+                                  key={i}
+                                  title={`Q ${q?.number}`}
+                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                />
+                              );
+                            }
+                          )}
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                    {/* applied */}
+                    <Grid item xs={12} md={6}>
+                      <Grid item xs={12} md={6}>
+                        <Typography textAlign="center">Applied</Typography>
+                        {/* structured */}
+                        <Stack textAlign="center">
+                          <Typography gutterBottom>structured</Typography>
+                          <Divider />
+                          {subject?.parts?.appliedMathematics?.questions?.structured?.map(
+                            (q: any, i: number) => {
+                              return (
+                                <Pair
+                                  key={i}
+                                  title={`Q ${q?.number}`}
+                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                />
+                              );
+                            }
+                          )}
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        {/* essay */}
+                        <Stack textAlign="center">
+                          <Typography gutterBottom>essay</Typography>
+                          <Divider />
+                          {subject?.parts?.appliedMathematics?.questions?.essay?.map(
+                            (q: any, i: number) => {
+                              return (
+                                <Pair
+                                  key={i}
+                                  title={`Q ${q?.number}`}
+                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                />
+                              );
+                            }
+                          )}
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Box>
+              ) : (
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    {/* structured */}
+                    <Stack textAlign="center">
+                      <Typography gutterBottom>structured</Typography>
+                      <Divider />
+                      <Stack justifyContent="center" alignItems="center">
+                        {subject?.questions?.structured?.map(
+                          (q: any, i: number) => {
+                            return (
+                              <Pair
+                                key={i}
+                                title={`Q ${q?.number}`}
+                                value={`${q?.marks}/${q?.maxMarks}`}
+                              />
+                            );
+                          }
+                        )}
+                      </Stack>
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    {/* essay */}
+                    <Stack textAlign="center">
+                      <Typography gutterBottom>essay</Typography>
+                      <Divider />
+                      <Stack justifyContent="center" alignItems="center">
+                        {subject?.questions?.essay?.map((q: any, i: number) => {
+                          return (
+                            <Pair
+                              key={i}
+                              title={`Q ${q?.number}`}
+                              value={`${q?.marks} /${q?.maxMarks}`}
+                            />
+                          );
+                        })}
+                      </Stack>
+                    </Stack>
+                  </Grid>
+                </Grid>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        </Box>
+      </Box>
+    );
+  });
 
   return (
     <Box className={classes.box}>
@@ -200,7 +441,7 @@ const Home: NextPage = () => {
           >
             {loading ? "Submitting" : "Submit"}
           </Button>
-          {result && (
+          {subjects.length !== 0 && (
             <Button
               variant="contained"
               color="error"
@@ -211,111 +452,69 @@ const Home: NextPage = () => {
             </Button>
           )}
         </form>
-        {result && result.length > 1 && (
-          <Typography>
-            * Multiple examines have registered under the same index number
-          </Typography>
-        )}
-        {result &&
-          result.map((r, i) => {
-            return (
-              <Box key={i}>
-                {result.length > 1 && (
-                  <Typography
-                    className={classes.multipleExmineTopic}
-                  >{`Examine: ${i + 1}`}</Typography>
-                )}
-
-                <Box className={classes.group}>
-                  <Box className={classes.group}>
-                    <Box className={classes.resultRow}>
-                      <Typography className={classes.key}>Name</Typography>
-                      <Typography>{r.name}</Typography>
-                    </Box>
-                    <Box className={classes.resultRow}>
+        {examine && (
+          <Box marginBottom="2em">
+            <Box className={classes.group}>
+              <Box className={classes.group}>
+                <Box className={classes.resultRow}>
+                  <Typography className={classes.key}>Name</Typography>
+                  <Typography>{examine?.name}</Typography>
+                </Box>
+                {/* <Box className={classes.resultRow}>
                       <Typography className={classes.key}>School</Typography>
-                      <Typography>{r.school}</Typography>
-                    </Box>
-                    <Box className={classes.resultRow}>
-                      <Typography className={classes.key}>
-                        Index Number
-                      </Typography>
-                      <Typography>{r.index}</Typography>
-                    </Box>
-                    <Box className={classes.resultRow}>
-                      <Typography className={classes.key}>Year</Typography>
-                      <Typography>2021</Typography>
-                    </Box>
-                    <Box className={classes.resultRow}>
-                      <Typography className={classes.key}>
-                        Subject Stream
-                      </Typography>
-                      <Typography>{r.subjectStream}</Typography>
-                    </Box>
-                  </Box>
-                  <Divider />
-                  <Box className={classes.group}>
-                    {r.subjects &&
-                      r.subjects.map((subject, index) => {
-                        return (
-                          <Box key={index}>
-                            <Box className={classes.resultRow}>
-                              <Typography className={classes.key}>
-                                {subject.subject}
-                              </Typography>
-                              <Typography>{subject.result}</Typography>
-                            </Box>
+                      <Typography>{examine?.school}</Typography>
+                    </Box> */}
+                <Box className={classes.resultRow}>
+                  <Typography className={classes.key}>Index Number</Typography>
+                  <Typography>{examine?.index}</Typography>
+                </Box>
+                <Box className={classes.resultRow}>
+                  <Typography className={classes.key}>Year</Typography>
+                  <Typography>2021</Typography>
+                </Box>
+                <Box className={classes.resultRow}>
+                  <Typography className={classes.key}>
+                    Subject Stream
+                  </Typography>
+                  <Typography>{examine?.stream}</Typography>
+                </Box>
+              </Box>
+              <Divider />
 
-                            <Box className={classes.subjectPartsContainer}>
-                              {subject.parts &&
-                                subject.parts.map((part, index) => {
-                                  return (
-                                    <Box key={index}>
-                                      <Box className={classes.resultRow}>
-                                        <Typography className={classes.key}>
-                                          {part.name}
-                                        </Typography>
-                                        <Typography>
-                                          {subject.subject ===
-                                          Subject.COMBINED_MATHEMATICS.toString()
-                                            ? part.marks / 10
-                                            : part.marks}
-                                        </Typography>
-                                      </Box>
-                                    </Box>
-                                  );
-                                })}
-                              <Box className={classes.resultRow}>
-                                <Typography className={classes.key}>
-                                  Total Marks
-                                </Typography>
-                                <Typography>{`${subject.totalMarks}%`}</Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                        );
-                      })}
-                  </Box>
-                  <Divider />
-                  <Box className={classes.group}>
-                    <Box className={classes.resultRow}>
-                      <Typography className={classes.key}>Z-Score</Typography>
-                      <Typography>{r.zScore}</Typography>
-                    </Box>
-                    <Box className={classes.resultRow}>
+              {/* subjects details */}
+              {renderSubjects}
+
+              <Divider />
+              <Box className={classes.group}>
+                <Box className={classes.resultRow}>
+                  <Typography className={classes.key}>Z-Score</Typography>
+                  <Typography>{examine?.zScore}</Typography>
+                </Box>
+                {/* <Box className={classes.resultRow}>
                       <Typography className={classes.key}>
                         Island Rank
                       </Typography>
-                      <Typography>{r.rank}</Typography>
-                    </Box>
-                  </Box>
-                </Box>
+                      <Typography>{result.examine.rank}</Typography>
+                    </Box> */}
               </Box>
-            );
-          })}
+            </Box>
+          </Box>
+        )}
       </Card>
     </Box>
   );
 };
 
 export default Home;
+
+const Pair = ({ title, value }: { title: string; value: string }) => {
+  const theme = useTheme();
+  return (
+    <Stack direction="row" gap={theme.spacing(5)}>
+      <Typography minWidth="5em" variant="caption">
+        {title}
+      </Typography>
+      <Typography variant="caption">{value}</Typography>
+    </Stack>
+  );
+};

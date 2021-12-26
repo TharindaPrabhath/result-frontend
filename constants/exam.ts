@@ -1,5 +1,7 @@
 export const TEST_NAME = "Learnsteer Test - 2021";
 
+export const EXAM_ID = "EQONmHgQK6Osc5a6KBkB";
+
 export interface ResultLetter {
   A: number;
   B: number;
@@ -12,6 +14,14 @@ export enum Subject {
   CHEMISTRY = "Chemistry",
   COMBINED_MATHEMATICS = "Combined Mathematics",
   BIOLOGY = "Biology",
+}
+
+export enum Paper {
+  PHYSICS = "Physics",
+  CHEMISTRY = "Chemistry",
+  BIOLOGY = "Biology",
+  PURE_MATHEMATICS = "Pure Mathematics",
+  APPLIED_MATHEMATICS = "Applied Mathematics",
 }
 
 const PHYSICS: ResultLetter = {

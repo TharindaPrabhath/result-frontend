@@ -18,15 +18,13 @@ import {
 import { makeStyles } from "@mui/styles";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
-// xlsx
-import XLSX from "xlsx";
-
 // firebase
-import { db } from "../../firebase/index";
+import db from "../../firebase/index";
 import { addDoc, collection } from "@firebase/firestore";
 
 // utils
 import { isEmpty } from "../../utils/index";
+import readFile from "../../utils/readFile";
 
 // constants
 import { CUT_OFF_MARKS, Subject } from "../../constants/exam";
@@ -44,27 +42,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontWeight: 600,
   },
 }));
-
-const readFile = (file: any) => {
-  const promise = new Promise((resolve, reject) => {
-    const fileReader = new FileReader();
-    fileReader.readAsArrayBuffer(file);
-
-    fileReader.onload = (e) => {
-      const bufferArray = e.target!.result;
-      const wb = XLSX.read(bufferArray, { type: "buffer" });
-      const worksheet = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(worksheet);
-
-      resolve(data);
-    };
-
-    fileReader.onerror = (err) => {
-      reject(err);
-    };
-  });
-  return promise;
-};
 
 const calculateTotalMarks = (
   part1: number,
