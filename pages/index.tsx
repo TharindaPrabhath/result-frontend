@@ -39,6 +39,7 @@ import {
   doc,
 } from "firebase/firestore";
 import db from "../firebase/index";
+import { StringifyOptions } from "querystring";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -203,8 +204,37 @@ const Home: NextPage = () => {
     setSubjects([]);
   };
 
-  console.log(examine);
-  console.log(subjects);
+  const getTotalMaxMarks = (subject: string, markName: string): number => {
+    if (subject === Subject.PHYSICS) {
+      if (markName === "mcq") return 50;
+      else if (markName === "structured") return 80;
+      return 120;
+    } else if (subject === Subject.COMBINED_MATHEMATICS) {
+      if (markName === "structured") return 250;
+      return 750;
+    }
+    // subject is Biology or Chemistry
+    if (markName === "mcq") return 50;
+    else if (markName === "structured") return 400;
+    return 600;
+  };
+
+  const getSingleQuestionMaxMarks = (
+    subject: string,
+    markName: string
+  ): number => {
+    if (subject === Subject.PHYSICS) {
+      if (markName === "structured") return 20;
+      return 30;
+    } else if (subject === Subject.COMBINED_MATHEMATICS) {
+      if (markName === "structured") return 25;
+      return 150;
+    }
+    // subject is Biology or Chemistry
+    if (markName === "mcq") return 50;
+    else if (markName === "structured") return 100;
+    return 150;
+  };
 
   const renderSubjects = subjects?.map((subject, index) => {
     return (
@@ -226,7 +256,10 @@ const Home: NextPage = () => {
                         {`${mark?.name} (Pure)`}
                       </Typography>
                       <Typography>
-                        {`${mark?.marks}/${mark?.maxMarks}`}
+                        {`${mark?.marks}/${getTotalMaxMarks(
+                          subject?.name,
+                          mark?.name
+                        )}`}
                       </Typography>
                     </Box>
                   );
@@ -240,7 +273,10 @@ const Home: NextPage = () => {
                         {`${mark?.name} (Applied)`}
                       </Typography>
                       <Typography>
-                        {`${mark?.marks}/${mark?.maxMarks}`}
+                        {`${mark?.marks}/${getTotalMaxMarks(
+                          subject?.name,
+                          mark?.name
+                        )}`}
                       </Typography>
                     </Box>
                   );
@@ -256,7 +292,10 @@ const Home: NextPage = () => {
                       {mark?.name}
                     </Typography>
                     <Typography>
-                      {`${mark?.marks}/${mark?.maxMarks}`}
+                      {`${mark?.marks}/${getTotalMaxMarks(
+                        subject?.name,
+                        mark?.name
+                      )}`}
                     </Typography>
                   </Box>
                 );
@@ -293,7 +332,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "structured"
+                                  )}`}
                                 />
                               );
                             }
@@ -311,7 +355,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "essay"
+                                  )}`}
                                 />
                               );
                             }
@@ -333,7 +382,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "structured"
+                                  )}`}
                                 />
                               );
                             }
@@ -351,7 +405,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "essay"
+                                  )}`}
                                 />
                               );
                             }
@@ -375,7 +434,10 @@ const Home: NextPage = () => {
                               <Pair
                                 key={i}
                                 title={`Q ${q?.number}`}
-                                value={`${q?.marks}/${q?.maxMarks}`}
+                                value={`${q?.marks}/${getSingleQuestionMaxMarks(
+                                  subject?.name,
+                                  "structured"
+                                )}`}
                               />
                             );
                           }
@@ -394,7 +456,10 @@ const Home: NextPage = () => {
                             <Pair
                               key={i}
                               title={`Q ${q?.number}`}
-                              value={`${q?.marks} /${q?.maxMarks}`}
+                              value={`${q?.marks} /${getSingleQuestionMaxMarks(
+                                subject?.name,
+                                "essay"
+                              )}`}
                             />
                           );
                         })}
