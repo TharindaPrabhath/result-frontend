@@ -99,18 +99,6 @@ const mathematics: GridColDef[] = [
   { field: "id", headerName: "Id", width: 20 },
   { field: "index", headerName: "Index", width: 120 },
   {
-    field: "result",
-    headerName: "Result",
-    width: 100,
-    editable: false,
-  },
-  {
-    field: "totalMarks",
-    headerName: "Total Marks",
-    width: 140,
-    editable: false,
-  },
-  {
     field: "paperTotalMarks",
     headerName: "Paper Total Marks",
     width: 180,
