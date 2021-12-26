@@ -74,6 +74,7 @@ export const getStaticProps: GetStaticProps = async () => {
     out.push({
       name: obj.name,
       // school: obj.school,
+      stream: obj.stream,
       rank: obj.rank,
       zScore: obj.zScore,
     });

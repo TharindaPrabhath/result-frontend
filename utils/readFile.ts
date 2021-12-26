@@ -2,7 +2,6 @@
 import XLSX from "xlsx";
 
 // reads the xlsx file & map to js object
-
 const readFile = (file: any) => {
   const promise = new Promise((resolve, reject) => {
     const fileReader = new FileReader();

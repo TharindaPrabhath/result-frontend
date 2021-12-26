@@ -198,6 +198,8 @@ const Home: NextPage = () => {
 
   const handleReset = (e: any) => {
     e.preventDefault();
+    setIndex("");
+    setExamine(null);
     setSubjects([]);
   };
 
