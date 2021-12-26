@@ -1,5 +1,7 @@
 export const TEST_NAME = "Learnsteer Test - 2021";
 
+export const EXAM_ID = "EQONmHgQK6Osc5a6KBkB";
+
 export interface ResultLetter {
   A: number;
   B: number;
