@@ -1,3 +1,9 @@
+// react
+import { useState } from "react";
+
+// next
+import type { NextPage } from "next";
+
 // mui
 import {
   Button,
@@ -19,10 +25,6 @@ import { makeStyles } from "@mui/styles";
 import { grey } from "@mui/material/colors";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-// next
-import type { NextPage } from "next";
-import { useState } from "react";
-
 // constants
 import { Subject, TEST_NAME } from "../constants/exam";
 
@@ -39,7 +41,6 @@ import {
   doc,
 } from "firebase/firestore";
 import db from "../firebase/index";
-import { StringifyOptions } from "querystring";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: {
@@ -174,10 +175,15 @@ const Home: NextPage = () => {
 
     setLoading(true);
 
+    // get sanitized index
+    // 1. remove white space
+    // 2. remove leading 0 if available
+    const sanitizedIndex = getSanitizedIndex(index);
+
     // get the relevant examine
     const q = query(
       collection(db, "examines"),
-      where("index", "==", parseInt(index))
+      where("index", "==", parseInt(sanitizedIndex))
     );
     getDocs(q)
       .then(async (res) => {
@@ -195,6 +201,12 @@ const Home: NextPage = () => {
         console.error(e);
         setLoading(false);
       });
+  };
+
+  const getSanitizedIndex = (index: string) => {
+    const trimmed = index.trim().replaceAll("-", "");
+    if (trimmed.startsWith("0")) return trimmed.substring(0);
+    return trimmed;
   };
 
   const handleReset = (e: any) => {
@@ -519,6 +531,7 @@ const Home: NextPage = () => {
             </Button>
           )}
         </form>
+
         {examine && (
           <Box marginBottom="2em">
             <Box className={classes.group}>

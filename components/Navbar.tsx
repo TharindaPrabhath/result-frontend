@@ -1,3 +1,10 @@
+// react
+import { useState } from "react";
+
+// next
+import Image from "next/image";
+import Link from "next/link";
+
 // mui
 import {
   AppBar,
@@ -10,19 +17,14 @@ import {
   Box,
   List,
   ListItemButton,
+  useTheme,
 } from "@mui/material";
 import { Menu } from "@mui/icons-material";
 import { makeStyles } from "@mui/styles";
 
-// next
-import Image from "next/image";
-import Link from "next/link";
-
 // constants
 import { BRAND } from "../constants";
 import { NAV_LINKS } from "../constants/links";
-
-import { useState } from "react";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -57,18 +59,31 @@ const useStyles = makeStyles((theme: Theme) => ({
 export default function Navbar() {
   const [openDrawer, setOpenDrawer] = useState(false);
   const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <AppBar className={classes.appBar} position="sticky">
       <Toolbar className={classes.toolbar}>
-        <Image src={BRAND.logo.logo1} alt="logo1" height={40} width={100} />
+        <Link href={BRAND.web.learnsteer}>
+          <a>
+            <Image
+              src={BRAND.logo.logo1}
+              alt="sasnaka learnsteer logo"
+              height={70}
+              width={200}
+              objectFit="fill"
+            />
+          </a>
+        </Link>
         <Container className={classes.container}>
           {NAV_LINKS.map((link, index) => {
             return (
-              <Link href={link.to} key={index} passHref>
-                <Typography className={classes.navLink} key={index}>
-                  {link.title}
-                </Typography>
+              <Link href={link.to} key={index}>
+                <a>
+                  <Typography className={classes.navLink} key={index}>
+                    {link.title}
+                  </Typography>
+                </a>
               </Link>
             );
           })}
@@ -88,22 +103,29 @@ export default function Navbar() {
           anchor="top"
           open={openDrawer}
           onClose={() => setOpenDrawer(false)}
+          sx={{
+            [theme.breakpoints.up("sm")]: {
+              display: "none",
+            },
+          }}
         >
           <Box
-            sx={{ width: "auto" }}
+            sx={{ width: "100%" }}
             role="presentation"
             onClick={() => setOpenDrawer(false)}
             onKeyDown={() => setOpenDrawer(false)}
           >
             <List>
               {NAV_LINKS.map((link, index) => (
-                <ListItemButton key={index} alignItems="center">
-                  <Link href={link.to} passHref>
-                    <Typography className={classes.navLink}>
-                      {link.title}
-                    </Typography>
-                  </Link>
-                </ListItemButton>
+                <Link key={index} href={link.to}>
+                  <a>
+                    <ListItemButton>
+                      <Typography className={classes.navLink}>
+                        {link.title}
+                      </Typography>
+                    </ListItemButton>
+                  </a>
+                </Link>
               ))}
             </List>
           </Box>

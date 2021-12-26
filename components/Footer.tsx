@@ -1,11 +1,11 @@
+// next
+import Image from "next/image";
+import Link from "next/link";
+
 // mui
 import { Typography, Box, Theme } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { makeStyles } from "@mui/styles";
-
-// next
-import Image from "next/image";
-import Link from "next/link";
 
 // constants
 import { BRAND } from "../constants";
@@ -47,17 +47,30 @@ export default function Footer() {
   return (
     <Box className={classes.box} padding={5}>
       <Box className={classes.innerBox}>
-        <Image src={BRAND.logo.logo1} alt="logo1" height={40} width={100} />
+        <Link href={BRAND.web.sasnka}>
+          <a>
+            <Image
+              src={BRAND.logo.logo3}
+              alt="learnsteer logo"
+              height={60}
+              width={140}
+              objectFit="contain"
+            />
+          </a>
+        </Link>
+
         <Box sx={{ display: "flex", flexDirection: "column", gap: "0.5em" }}>
           <Typography sx={{ fontWeight: 600, marginBottom: "1em" }}>
             Pages
           </Typography>
           {NAV_LINKS.map((link, index) => {
             return (
-              <Link href={link.to} key={index} passHref>
-                <Typography className={classes.link} key={index}>
-                  {link.title}
-                </Typography>
+              <Link href={link.to} key={index}>
+                <a>
+                  <Typography className={classes.link} key={index}>
+                    {link.title}
+                  </Typography>
+                </a>
               </Link>
             );
           })}
@@ -69,9 +82,11 @@ export default function Footer() {
           <Box sx={{ display: "flex", gap: "1em" }}>
             {SOCIAL_MEDIA_LINKS.map((link, index) => {
               return (
-                <a href={link.to} key={index}>
-                  <link.icon className={classes.link} />
-                </a>
+                <Link key={index} href={link.to}>
+                  <a>
+                    <link.icon className={classes.link} />
+                  </a>
+                </Link>
               );
             })}
           </Box>
