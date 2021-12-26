@@ -15,7 +15,7 @@ import { TEST_NAME } from "../../constants/exam";
 
 // firebase
 import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
-import { db } from "../../firebase/index";
+import db from "../../firebase/index";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: { backgroundColor: theme.palette.primary.light, padding: "2em 0" },
@@ -73,7 +73,7 @@ export const getStaticProps: GetStaticProps = async () => {
     const obj = doc.data();
     out.push({
       name: obj.name,
-      school: obj.school,
+      // school: obj.school,
       rank: obj.rank,
       zScore: obj.zScore,
     });
