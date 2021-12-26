@@ -1,4 +1,4 @@
-export const TEST_NAME = "Learnsteer Test - 2021";
+export const TEST_NAME = "G.C.E A/L Island Wide Model Test";
 
 export const EXAM_ID = "EQONmHgQK6Osc5a6KBkB";
 

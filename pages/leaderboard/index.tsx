@@ -1,21 +1,19 @@
 // mui
-import { Typography, Box, Theme, Card } from "@mui/material";
+import { Typography, Box, Theme, Card, useTheme, Stack } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 
 // next
-import { GetStaticProps } from "next";
+// import { GetStaticProps } from "next";
 
 // components
-import LeaderboardRow, {
-  LeaderboardData,
-} from "../../components/LeaderboardRow";
+import LeaderboardRow from "../../components/LeaderboardRow";
 
 // constants
 import { TEST_NAME } from "../../constants/exam";
 
 // firebase
-import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
-import db from "../../firebase/index";
+// import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
+// import db from "../../firebase/index";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: { backgroundColor: theme.palette.primary.light, padding: "2em 0" },
@@ -36,13 +34,14 @@ const useStyles = makeStyles((theme: Theme) => ({
   leaderboardBox: {
     display: "flex",
     flexDirection: "column",
-    gap: theme.spacing(1),
+    gap: theme.spacing(8),
   },
 }));
 
-export default function Leaderboard(props: any) {
-  const data = props.data as LeaderboardData[];
+export default function Leaderboard() {
+  // const data = props.data as LeaderboardData[];
   const classes = useStyles();
+  const theme = useTheme();
   return (
     <Box className={classes.box}>
       <Card className={classes.card}>
@@ -56,32 +55,113 @@ export default function Leaderboard(props: any) {
           {TEST_NAME}
         </Typography>
         <Box className={classes.leaderboardBox}>
-          {data.map((d, index) => {
+          <Box>
+            <Box
+              bgcolor={theme.palette.secondary.main}
+              sx={{ padding: theme.spacing(1) }}
+            >
+              <Typography
+                textAlign="center"
+                fontWeight={theme.typography.fontWeightBold}
+                color={theme.palette.secondary.contrastText}
+              >
+                Physical Science Stream
+              </Typography>
+            </Box>
+            <Stack gap={theme.spacing(1)}>
+              <LeaderboardRow
+                data={{
+                  name: "AD Alwela",
+                  school: "Bandarawela Central College",
+                  zScore: 2.6361,
+                  rank: 1,
+                }}
+              />
+              <LeaderboardRow
+                data={{
+                  name: "Chamoda Pramudika",
+                  school: "G/Sri Devananda College",
+                  zScore: 2.2934,
+                  rank: 2,
+                }}
+              />
+              <LeaderboardRow
+                data={{
+                  name: "Tharuka Cooray",
+                  school: "Mahamaya Girls College - Kandy",
+                  zScore: 2.1233,
+                  rank: 3,
+                }}
+              />
+            </Stack>
+          </Box>
+
+          <Box>
+            <Box
+              bgcolor={theme.palette.secondary.main}
+              sx={{ padding: theme.spacing(1) }}
+            >
+              <Typography
+                textAlign="center"
+                fontWeight={theme.typography.fontWeightBold}
+                color={theme.palette.secondary.contrastText}
+              >
+                Biological Science Stream
+              </Typography>
+            </Box>
+            <Stack gap={theme.spacing(1)}>
+              <LeaderboardRow
+                data={{
+                  name: "Benuljith Karunarathne ",
+                  school: "Royal College - Colombo 7",
+                  zScore: 2.6001,
+                  rank: 1,
+                }}
+              />
+              <LeaderboardRow
+                data={{
+                  name: " W.M.S.S.BANDARA",
+                  school: "Kingswood College - Kandy",
+                  zScore: 2.2311,
+                  rank: 2,
+                }}
+              />
+              <LeaderboardRow
+                data={{
+                  name: " Hasini Perera",
+                  school: "Sripalee  College ",
+                  zScore: 2.0417,
+                  rank: 3,
+                }}
+              />
+            </Stack>
+          </Box>
+          {/* {data.map((d, index) => {
             return <LeaderboardRow data={d} key={index} />;
-          })}
+          })} */}
         </Box>
       </Card>
     </Box>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
-  const q = query(collection(db, "examines"), orderBy("rank"), limit(10));
-  const d = await getDocs(q);
-  let out: LeaderboardData[] = [];
-  d.docs.forEach((doc) => {
-    const obj = doc.data();
-    out.push({
-      name: obj.name,
-      // school: obj.school,
-      stream: obj.stream,
-      rank: obj.rank,
-      zScore: obj.zScore,
-    });
-  });
-  return {
-    props: {
-      data: out,
-    },
-  };
-};
+// export const getStaticProps: GetStaticProps = async () => {
+//   const q = query(collection(db, "examines"), orderBy("rank"), limit(10));
+//   const d = await getDocs(q);
+//   let out: LeaderboardData[] = [];
+//   d.docs.forEach((doc) => {
+//     const obj = doc.data();
+//     out.push({
+//       name: obj.name,
+//       // school: obj.school,
+//       stream: obj.stream,
+//       rank: obj.rank,
+//       zScore: obj.zScore,
+//     });
+//   });
+//   return {
+//     props: {
+//       data: out,
+//     },
+//   };
+// };

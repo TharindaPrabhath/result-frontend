@@ -34,13 +34,13 @@ export default function LeaderboardRow({ data }: { data: LeaderboardData }) {
 
   return (
     <Card className={classes.card}>
-      <Box style={{ width: "2em" }}>
+      <Box sx={{ flex: 1 }}>
         <Typography sx={{ fontWeight: 600 }}>{data.rank}</Typography>
       </Box>
-      <Box>
+      <Box sx={{ flex: 2, width: "100%" }}>
         <Typography sx={{ fontWeight: 600 }}>{data.name}</Typography>
-        {!isEmpty(data.stream!) && (
-          <Typography color={grey[500]}>{data.stream}</Typography>
+        {!isEmpty(data.school!) && (
+          <Typography color={grey[500]}>{data.school}</Typography>
         )}
       </Box>
       <Box className={classes.zScore}>

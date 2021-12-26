@@ -1,3 +1,9 @@
+// react
+import { useState } from "react";
+
+// next
+import type { NextPage } from "next";
+
 // mui
 import {
   Button,
@@ -18,10 +24,6 @@ import {
 import { makeStyles } from "@mui/styles";
 import { grey } from "@mui/material/colors";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
-// next
-import type { NextPage } from "next";
-import { useState } from "react";
 
 // constants
 import { Subject, TEST_NAME } from "../constants/exam";
@@ -173,10 +175,15 @@ const Home: NextPage = () => {
 
     setLoading(true);
 
+    // get sanitized index
+    // 1. remove white space
+    // 2. remove leading 0 if available
+    const sanitizedIndex = getSanitizedIndex(index);
+
     // get the relevant examine
     const q = query(
       collection(db, "examines"),
-      where("index", "==", parseInt(index))
+      where("index", "==", parseInt(sanitizedIndex))
     );
     getDocs(q)
       .then(async (res) => {
@@ -196,6 +203,12 @@ const Home: NextPage = () => {
       });
   };
 
+  const getSanitizedIndex = (index: string) => {
+    const trimmed = index.trim().replaceAll("-", "");
+    if (trimmed.startsWith("0")) return trimmed.substring(0);
+    return trimmed;
+  };
+
   const handleReset = (e: any) => {
     e.preventDefault();
     setIndex("");
@@ -203,8 +216,37 @@ const Home: NextPage = () => {
     setSubjects([]);
   };
 
-  console.log(examine);
-  console.log(subjects);
+  const getTotalMaxMarks = (subject: string, markName: string): number => {
+    if (subject === Subject.PHYSICS) {
+      if (markName === "mcq") return 50;
+      else if (markName === "structured") return 80;
+      return 120;
+    } else if (subject === Subject.COMBINED_MATHEMATICS) {
+      if (markName === "structured") return 250;
+      return 750;
+    }
+    // subject is Biology or Chemistry
+    if (markName === "mcq") return 50;
+    else if (markName === "structured") return 400;
+    return 600;
+  };
+
+  const getSingleQuestionMaxMarks = (
+    subject: string,
+    markName: string
+  ): number => {
+    if (subject === Subject.PHYSICS) {
+      if (markName === "structured") return 20;
+      return 30;
+    } else if (subject === Subject.COMBINED_MATHEMATICS) {
+      if (markName === "structured") return 25;
+      return 150;
+    }
+    // subject is Biology or Chemistry
+    if (markName === "mcq") return 50;
+    else if (markName === "structured") return 100;
+    return 150;
+  };
 
   const renderSubjects = subjects?.map((subject, index) => {
     return (
@@ -226,7 +268,10 @@ const Home: NextPage = () => {
                         {`${mark?.name} (Pure)`}
                       </Typography>
                       <Typography>
-                        {`${mark?.marks}/${mark?.maxMarks}`}
+                        {`${mark?.marks}/${getTotalMaxMarks(
+                          subject?.name,
+                          mark?.name
+                        )}`}
                       </Typography>
                     </Box>
                   );
@@ -240,7 +285,10 @@ const Home: NextPage = () => {
                         {`${mark?.name} (Applied)`}
                       </Typography>
                       <Typography>
-                        {`${mark?.marks}/${mark?.maxMarks}`}
+                        {`${mark?.marks}/${getTotalMaxMarks(
+                          subject?.name,
+                          mark?.name
+                        )}`}
                       </Typography>
                     </Box>
                   );
@@ -256,7 +304,10 @@ const Home: NextPage = () => {
                       {mark?.name}
                     </Typography>
                     <Typography>
-                      {`${mark?.marks}/${mark?.maxMarks}`}
+                      {`${mark?.marks}/${getTotalMaxMarks(
+                        subject?.name,
+                        mark?.name
+                      )}`}
                     </Typography>
                   </Box>
                 );
@@ -293,7 +344,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "structured"
+                                  )}`}
                                 />
                               );
                             }
@@ -311,7 +367,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "essay"
+                                  )}`}
                                 />
                               );
                             }
@@ -333,7 +394,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "structured"
+                                  )}`}
                                 />
                               );
                             }
@@ -351,7 +417,12 @@ const Home: NextPage = () => {
                                 <Pair
                                   key={i}
                                   title={`Q ${q?.number}`}
-                                  value={`${q?.marks}/${q?.maxMarks}`}
+                                  value={`${
+                                    q?.marks
+                                  }/${getSingleQuestionMaxMarks(
+                                    subject?.name,
+                                    "essay"
+                                  )}`}
                                 />
                               );
                             }
@@ -375,7 +446,10 @@ const Home: NextPage = () => {
                               <Pair
                                 key={i}
                                 title={`Q ${q?.number}`}
-                                value={`${q?.marks}/${q?.maxMarks}`}
+                                value={`${q?.marks}/${getSingleQuestionMaxMarks(
+                                  subject?.name,
+                                  "structured"
+                                )}`}
                               />
                             );
                           }
@@ -394,7 +468,10 @@ const Home: NextPage = () => {
                             <Pair
                               key={i}
                               title={`Q ${q?.number}`}
-                              value={`${q?.marks} /${q?.maxMarks}`}
+                              value={`${q?.marks} /${getSingleQuestionMaxMarks(
+                                subject?.name,
+                                "essay"
+                              )}`}
                             />
                           );
                         })}
@@ -454,6 +531,7 @@ const Home: NextPage = () => {
             </Button>
           )}
         </form>
+
         {examine && (
           <Box marginBottom="2em">
             <Box className={classes.group}>
