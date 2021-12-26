@@ -19,7 +19,7 @@ import { makeStyles } from "@mui/styles";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 // firebase
-import { db } from "../../firebase/index";
+import db from "../../firebase/index";
 import { addDoc, collection } from "@firebase/firestore";
 
 // utils
