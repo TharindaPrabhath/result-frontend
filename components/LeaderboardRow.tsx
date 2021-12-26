@@ -7,6 +7,7 @@ import { isEmpty } from "../utils";
 
 export interface LeaderboardData {
   name: string;
+  stream?: string;
   school?: string;
   rank: number;
   zScore: number;
@@ -38,8 +39,8 @@ export default function LeaderboardRow({ data }: { data: LeaderboardData }) {
       </Box>
       <Box>
         <Typography sx={{ fontWeight: 600 }}>{data.name}</Typography>
-        {!isEmpty(data.school!) && (
-          <Typography color={grey[500]}>{data.school}</Typography>
+        {!isEmpty(data.stream!) && (
+          <Typography color={grey[500]}>{data.stream}</Typography>
         )}
       </Box>
       <Box className={classes.zScore}>

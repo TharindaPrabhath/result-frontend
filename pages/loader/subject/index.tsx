@@ -26,7 +26,6 @@ import {
   addDoc,
   collection,
   doc,
-  getDoc,
   getDocs,
   query,
   setDoc,
@@ -375,8 +374,6 @@ export default function SubjectLoader() {
             // get first document from the matchedDocs array. (Technically, there should be only one element in that array. otherwise it's an error)
             const docId = matchedDocs[0].id;
             // update this specific document
-            console.log(docId);
-
             const docRef = doc(collectionRef, docId);
             setDoc(
               docRef,
