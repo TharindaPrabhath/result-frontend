@@ -1,5 +1,5 @@
 // mui
-import { Typography, Box, Theme, Icon } from "@mui/material";
+import { Typography, Box, Theme } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { makeStyles } from "@mui/styles";
 
