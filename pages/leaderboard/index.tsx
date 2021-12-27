@@ -1,20 +1,15 @@
+// next
+import Head from "next/head";
+
 // mui
 import { Typography, Box, Theme, Card, useTheme, Stack } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-
-// next
-import Head from "next/head";
-// import { GetStaticProps } from "next";
 
 // components
 import LeaderboardRow from "../../components/LeaderboardRow";
 
 // constants
 import { TEST_NAME } from "../../constants/exam";
-
-// firebase
-// import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
-// import db from "../../firebase/index";
 
 const useStyles = makeStyles((theme: Theme) => ({
   box: { backgroundColor: theme.palette.primary.light, padding: "2em 0" },
@@ -40,7 +35,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export default function Leaderboard() {
-  // const data = props.data as LeaderboardData[];
   const classes = useStyles();
   const theme = useTheme();
   return (
@@ -141,32 +135,8 @@ export default function Leaderboard() {
               />
             </Stack>
           </Box>
-          {/* {data.map((d, index) => {
-            return <LeaderboardRow data={d} key={index} />;
-          })} */}
         </Box>
       </Card>
     </Box>
   );
 }
-
-// export const getStaticProps: GetStaticProps = async () => {
-//   const q = query(collection(db, "examines"), orderBy("rank"), limit(10));
-//   const d = await getDocs(q);
-//   let out: LeaderboardData[] = [];
-//   d.docs.forEach((doc) => {
-//     const obj = doc.data();
-//     out.push({
-//       name: obj.name,
-//       // school: obj.school,
-//       stream: obj.stream,
-//       rank: obj.rank,
-//       zScore: obj.zScore,
-//     });
-//   });
-//   return {
-//     props: {
-//       data: out,
-//     },
-//   };
-// };

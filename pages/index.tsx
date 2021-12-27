@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   gradeLetter: {
     backgroundColor: grey[400],
     padding: theme.spacing(0.5),
-    width: "2em",
+    width: "auto",
     textAlign: "center",
   },
 }));
@@ -118,6 +118,7 @@ const Home: NextPage = () => {
   const [error, setError] = useState("");
   const [examine, setExamine] = useState<any | null>(null);
   const [subjects, setSubjects] = useState<any[]>([]);
+  const theme = useTheme();
   const classes = useStyles();
 
   const getAsResults = async (examineDoc: any) => {
@@ -586,20 +587,22 @@ const Home: NextPage = () => {
           </Box>
         )}
         {examine && (
-          <Box>
-            <Typography variant="caption">* IWE - </Typography>
-            <Typography variant="caption">* N/A - </Typography>
+          <Stack gap={theme.spacing(1)}>
+            <Typography variant="caption">
+              * IWE - Incomplete Written Exam
+            </Typography>
+            <Typography variant="caption">* N/A - Not Applicable</Typography>
             <Typography textAlign="justify">
-              මේ පැවැත් වූ විභාගය පෙරහුරු පරීක්ෂණයක් පමණක් වන අතර, මෙහි දී ඔබට
+              {`මේ පැවැත් වූ විභාගය පෙරහුරු පරීක්ෂණයක් පමණක් වන අතර, මෙහි දී ඔබට
               ලැබී ඇති ප්‍රතිඵල උසස් පෙළ විභාගයේ ප්‍රතිඵල හා සමාන කොට සසඳා නොබලන
               මෙන් කාරුණිකව ඉල්ලා සිටිමු . මෙම ප්‍රශ්න පත්‍ර වලට මුහුණ දීමේදී
               ඇතිවූ අතපසුවීම්, අඩුපාඩු සකස් කරගෙන ඉදිරියේදි පැවැත්වීමට නියමිත
               උසස් පෙළ විභාගයට සාර්ථකව මුහුණ දීමට ඉඩ සැලසීම අපගේ අරමුණ යි. මෙය
               හුදෙක් ජාතික තත්ත්වයේ විභාගයක් නියමිත කාලය තුළ දී පිළිතුරු ලිවීම
               සදහා ඔබට හුරුකරවීම උදෙසා සස්නක සංසද සහෘදයින් විසින් සිදුකළ තවත්
-              එක් ප්‍රයත්නයකි.
+              එක් ප්‍රයත්නයකි.`}
             </Typography>
-          </Box>
+          </Stack>
         )}
       </Card>
     </Box>
