@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   gradeLetter: {
     backgroundColor: grey[400],
     padding: theme.spacing(0.5),
-    width: "2em",
+    width: "auto",
     textAlign: "center",
   },
 }));
