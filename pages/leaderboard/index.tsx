@@ -3,6 +3,7 @@ import { Typography, Box, Theme, Card, useTheme, Stack } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 
 // next
+import Head from "next/head";
 // import { GetStaticProps } from "next";
 
 // components
@@ -44,6 +45,10 @@ export default function Leaderboard() {
   const theme = useTheme();
   return (
     <Box className={classes.box}>
+      <Head>
+        <title>Result-Leaderboard</title>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      </Head>
       <Card className={classes.card}>
         <Typography
           variant="h4"

@@ -3,6 +3,7 @@ import { useState } from "react";
 
 // next
 import type { NextPage } from "next";
+import Head from "next/head";
 
 // mui
 import {
@@ -489,6 +490,10 @@ const Home: NextPage = () => {
 
   return (
     <Box className={classes.box}>
+      <Head>
+        <title>Result Sasnaka Sansada-Learnsteer</title>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      </Head>
       <Card className={classes.card}>
         <Typography
           variant="h4"
@@ -578,6 +583,22 @@ const Home: NextPage = () => {
                     </Box> */}
               </Box>
             </Box>
+          </Box>
+        )}
+        {examine && (
+          <Box>
+            <Typography variant="caption">* IWE - </Typography>
+            <Typography variant="caption">* N/A - </Typography>
+            <Typography textAlign="justify">
+              මේ පැවැත් වූ විභාගය පෙරහුරු පරීක්ෂණයක් පමණක් වන අතර, මෙහි දී ඔබට
+              ලැබී ඇති ප්‍රතිඵල උසස් පෙළ විභාගයේ ප්‍රතිඵල හා සමාන කොට සසඳා නොබලන
+              මෙන් කාරුණිකව ඉල්ලා සිටිමු . මෙම ප්‍රශ්න පත්‍ර වලට මුහුණ දීමේදී
+              ඇතිවූ අතපසුවීම්, අඩුපාඩු සකස් කරගෙන ඉදිරියේදි පැවැත්වීමට නියමිත
+              උසස් පෙළ විභාගයට සාර්ථකව මුහුණ දීමට ඉඩ සැලසීම අපගේ අරමුණ යි. මෙය
+              හුදෙක් ජාතික තත්ත්වයේ විභාගයක් නියමිත කාලය තුළ දී පිළිතුරු ලිවීම
+              සදහා ඔබට හුරුකරවීම උදෙසා සස්නක සංසද සහෘදයින් විසින් සිදුකළ තවත්
+              එක් ප්‍රයත්නයකි.
+            </Typography>
           </Box>
         )}
       </Card>
