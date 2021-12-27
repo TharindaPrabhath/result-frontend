@@ -17,6 +17,45 @@ export default class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600&display=swap"
             rel="stylesheet"
           />
+
+          {/* primary meta tags */}
+          <meta name="title" content="G.C.E A/L Island Wide Model Test" />
+          <meta
+            name="description"
+            content="This is the official result site of G.C.E A/L Island Wide Model Test which was held by Sasnaka Sansada-Learnsteer"
+          />
+
+          {/* open graph/ fb meta tags */}
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://results.sasnaka.org/" />
+          <meta
+            property="og:title"
+            content="G.C.E A/L Island Wide Model Test"
+          />
+          <meta
+            property="og:description"
+            content="This is the official result site of G.C.E A/L Island Wide Model Test which was held by Sasnaka Sansada-Learnsteer"
+          />
+          <meta
+            property="og:image"
+            content="https://results.sasnaka.org/logo/sasnaka-learn-steerApp.png"
+          />
+
+          {/* twitter meta tags */}
+          <meta property="twitter:card" content="summary_large_image" />
+          <meta property="twitter:url" content="https://results.sasnaka.org/" />
+          <meta
+            property="twitter:title"
+            content="G.C.E A/L Island Wide Model Test"
+          />
+          <meta
+            property="twitter:description"
+            content="This is the official result site of G.C.E A/L Island Wide Model Test which was held by Sasnaka Sansada-Learnsteer"
+          />
+          <meta
+            property="twitter:image"
+            content="https://results.sasnaka.org/logo/sasnaka-learn-steerApp.png"
+          />
         </Head>
         <body>
           <Main />
