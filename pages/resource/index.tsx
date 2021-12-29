@@ -46,7 +46,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 function Resource({ exam }: any) {
   const theme = useTheme();
   const classes = useStyles();
-  console.log(exam);
   return (
     <Box className={classes.box}>
       <Head>
