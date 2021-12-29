@@ -24,6 +24,10 @@ export const NAV_LINKS: Link[] = [
     to: "/leaderboard",
   },
   {
+    title: "Resource",
+    to: "/resource",
+  },
+  {
     title: "About",
     to: `${BRAND.web.sasnka}/#/about-us`,
   },
