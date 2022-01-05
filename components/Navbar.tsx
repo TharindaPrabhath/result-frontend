@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "space-between",
   },
   menuBtn: {
-    [theme.breakpoints.up("sm")]: {
+    [theme.breakpoints.up("md")]: {
       display: "none",
     },
   },
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     gap: theme.spacing(3),
     justifyContent: "center",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("md")]: {
       display: "none",
     },
     [theme.breakpoints.up("md")]: {
