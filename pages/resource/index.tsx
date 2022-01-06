@@ -108,7 +108,7 @@ function Resource({ exam }: any) {
 export default Resource;
 
 export const getStaticProps: GetStaticProps = async () => {
-  //  get relevant exam doc
+  // get relevant exam doc
   const docRef = doc(db, "exams", EXAM_ID);
   const examDoc = await getDoc(docRef);
 
