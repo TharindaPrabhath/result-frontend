@@ -7,7 +7,6 @@
   </div>
 
 ## Overview
-
 This result platform was built to present the exam results of examinees. Examinees can view their results by visiting the platform via the web and entering their index number. Currently, this platform is only responsible for handling the presenting part of the results. Yet, there is no admin panel created for handling the CRUD operations with the database. But I have successfully integrated the platform with third parties and used a custom script (written by myself) to upload the result sheets to the db.
 
 ## Features
@@ -32,7 +31,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to interac
 
 ## Usage
 #### Home Page
-
 <img src="https://res.cloudinary.com/drifly/image/upload/v1654195094/GitHub/ResultPlatform/Home_ern2hm.png" width="500px" alt="Home Page"/>
 
 #### Individual Examinee Result Page
