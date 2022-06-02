@@ -1,6 +1,24 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<div style="display: flex; flex-direction: row">
+  <img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next Js" />
+   <img src="https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white" alt="Firebase" />
+  <img src="https://img.shields.io/badge/MUI-%230081CB.svg?style=for-the-badge&logo=mui&logoColor=white" alt="MUI" />
+  <img src="https://img.shields.io/badge/yarn-%232C8EBB.svg?style=for-the-badge&logo=yarn&logoColor=white" alt="Yarn" />
+  </div>
 
-## Getting Started
+## Overview
+
+This result platform was built to present the exam results of examinees. Examinees can view their results by visiting the platform via the web and entering their index number. Currently, this platform is only responsible for handling the presenting part of the results. Yet, there is no admin panel created for handling the CRUD operations with the database. But I have successfully integrated the platform with third parties and used a custom script (written by myself) to upload the result sheets to the db.
+
+## Features
+- View results of the examinees
+- Leaderboard
+- Downloadable resources related to the exam
+
+## Demo
+This is a real-world usage of this platform [Visit](https://result-frontend-htdrr54r9-tharindaprabhath.vercel.app/).
+
+## Installation
 
 First, run the development server:
 
@@ -10,25 +28,28 @@ npm run dev
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to interact with the platform.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Usage
+#### Home Page
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+<img src="https://res.cloudinary.com/drifly/image/upload/v1654195094/GitHub/ResultPlatform/Home_ern2hm.png" width="500px" alt="Home Page"/>
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+#### Individual Examinee Result Page
+<img src="https://res.cloudinary.com/drifly/image/upload/v1654195099/GitHub/ResultPlatform/Examinee_Result_ueu1dv.png" width="500px" alt="Individual Examinee Result Page"/>
 
-## Learn More
+#### Leaderboard Page
+<img src="https://res.cloudinary.com/drifly/image/upload/v1654195096/GitHub/ResultPlatform/Leaderboard_wzaapd.png" width="500px" alt="Leaderboard Page"/>
+![Leaderboard Page](https://res.cloudinary.com/drifly/image/upload/v1654195096/GitHub/ResultPlatform/Leaderboard_wzaapd.png)
 
-To learn more about Next.js, take a look at the following resources:
+#### Resource Page
+<img src="https://res.cloudinary.com/drifly/image/upload/v1654195098/GitHub/ResultPlatform/Resources_klvyjm.png" width="500px" alt="Resource Page"/>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
+Forks are lovely. Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Roadmap
+I'm planning to extend the functionality by adding an admin panel to easily proceed with the CRUD operations. Any contribution is warmly welcome. 
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
