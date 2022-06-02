@@ -40,7 +40,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to interac
 
 #### Leaderboard Page
 <img src="https://res.cloudinary.com/drifly/image/upload/v1654195096/GitHub/ResultPlatform/Leaderboard_wzaapd.png" width="500px" alt="Leaderboard Page"/>
-![Leaderboard Page](https://res.cloudinary.com/drifly/image/upload/v1654195096/GitHub/ResultPlatform/Leaderboard_wzaapd.png)
 
 #### Resource Page
 <img src="https://res.cloudinary.com/drifly/image/upload/v1654195098/GitHub/ResultPlatform/Resources_klvyjm.png" width="500px" alt="Resource Page"/>
